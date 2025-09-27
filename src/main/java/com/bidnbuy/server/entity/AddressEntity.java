@@ -39,6 +39,6 @@ public class AddressEntity {
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "update_at", nullable = false)
-    private LocalDateTime updateAt;
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 }
