@@ -1,6 +1,5 @@
 package com.bidnbuy.server.dto;
 
-import com.bidnbuy.server.entity.UserEntity;
 import com.bidnbuy.server.enums.IsVerified;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @AllArgsConstructor
-public class EmailVerificationDTO {
+public class EmailVerificationDto {
     private  long emailId;
     private long userId;
     private String email;
