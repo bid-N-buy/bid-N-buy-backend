@@ -1,6 +1,5 @@
 package com.bidnbuy.server.dto;
 
-import jakarta.persistence.Entity;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -9,7 +8,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @AllArgsConstructor
-public class AdminDTO {
+public class AdminDto {
     private long adminId;
     private String email;
     private String password;

@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @AllArgsConstructor
-public class AddressDTO {
+public class AddressDto {
     private long addressId;
     private String zonecode;
     private String address;
