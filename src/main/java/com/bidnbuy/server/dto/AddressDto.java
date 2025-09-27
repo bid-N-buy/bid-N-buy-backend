@@ -18,5 +18,5 @@ public class AddressDto {
     private char addressType;
     private String detailAddress;
     private LocalDateTime createdAt;
-    private LocalDateTime updateAt;
+    private LocalDateTime updatedAt;
 }

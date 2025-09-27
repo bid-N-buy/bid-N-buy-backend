@@ -32,7 +32,7 @@ create table User(
     auth_status ENUM('Y', 'N', 'P') default 'N' not null,
     user_status ENUM('Y', 'N', 'B') default 'Y' not null,
     user_type VARCHAR(20),
-    create_at DATETIME DEFAULT  CURRENT_TIMESTAMP not null,
+    created_at DATETIME DEFAULT  CURRENT_TIMESTAMP not null,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL,
     deleted_at DATETIME null,
 
@@ -47,7 +47,7 @@ create table EmailVerification(
     valid_code varchar(50) not null,
     expiration_time TIMESTAMP,
     is_verified ENUM('Y', 'N', 'P') default 'N' not null,
-    create_at DATETIME DEFAULT  CURRENT_TIMESTAMP not null,
+    created_at DATETIME DEFAULT  CURRENT_TIMESTAMP not null,
 
     FOREIGN KEY (user_id) REFERENCES User(user_id)
 );

@@ -15,5 +15,5 @@ public class AdminDto {
     private String name;
     private String ipAddress;
     private LocalDateTime createdAt;
-    private LocalDateTime updateAt;
+    private LocalDateTime updatedAt;
 }
