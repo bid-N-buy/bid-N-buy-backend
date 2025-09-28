@@ -40,5 +40,21 @@ public class UserService {
         return repository.save(userEntity);
     }
 
+    //로그인 검증
+    public UserEntity findByEmailAndPassword(final String email, String password){
+        final UserEntity ogUser = repository.findByEmail(email);
+        //사용자 존재 여부 확인
+        if(ogUser == null){
+            log.warn("User not found for email:{}", email);
+            return null;
+        }
+        //비밀번호 일치
+        if(passwordEncoder.matches(password, ogUser.getPassword())){
+            return ogUser;
+        }
+        log.warn("password mismatch for email:{}", email);
+        return null;
+    }
+
 
 }
