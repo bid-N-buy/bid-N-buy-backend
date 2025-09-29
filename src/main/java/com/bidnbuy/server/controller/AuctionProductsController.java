@@ -25,6 +25,7 @@ public class AuctionProductsController {
     @Autowired
     private AuctionProductsService auctionProductsService;
 
+    // 등록
     @PostMapping
     public ResponseEntity<?> create(
             @AuthenticationPrincipal Long userId,
