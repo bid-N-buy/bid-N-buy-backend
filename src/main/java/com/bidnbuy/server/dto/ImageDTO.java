@@ -5,11 +5,6 @@ import lombok.Data;
 
 @Data
 public class ImageDTO {
-    private String ImageUrl;
-
-    public ImageEntity toEntity(String ImageUrl) {
-        return ImageEntity.builder()
-                .imageUrl(ImageUrl)
-                .build();
-    }
+    private String imageUrl;
+    private String imageType;
 }
