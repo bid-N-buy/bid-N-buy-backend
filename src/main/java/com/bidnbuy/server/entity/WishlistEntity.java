@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Data
 @Entity
 @Table(name="WishList")
-public class WishLisEntity {
+public class WishlistEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "wishlist_id")
