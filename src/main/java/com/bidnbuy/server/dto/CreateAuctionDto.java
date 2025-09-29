@@ -16,8 +16,8 @@ public class CreateAuctionDto {
     //private List<ImageDTO> image;
     private String title;
     private String description;
-    private Integer start_price;
-    private Integer min_bid_price;
-    private LocalDateTime start_time;
-    private LocalDateTime end_time;
+    private Integer startPrice;
+    private Integer minBidPrice;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
 }
