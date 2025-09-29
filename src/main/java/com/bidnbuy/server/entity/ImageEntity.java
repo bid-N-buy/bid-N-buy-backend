@@ -25,7 +25,7 @@ public class ImageEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "auction_id", nullable = false)
-    private AuctionProductsEntity auctionProductsEntity ;
+    private AuctionProductsEntity auctionProduct ;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
