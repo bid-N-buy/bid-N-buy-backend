@@ -14,11 +14,11 @@ import java.util.List;
 @Builder
 public class CreateAuctionDTO {
     private Long categoryId;
-    private List<ImageDTO> image;
+    //private List<ImageDTO> image;
     private String title;
     private String description;
-    private int start_price;
-    private int min_bid_price;
+    private Integer start_price;
+    private Integer min_bid_price;
     private LocalDateTime start_time;
     private LocalDateTime end_time;
 }
