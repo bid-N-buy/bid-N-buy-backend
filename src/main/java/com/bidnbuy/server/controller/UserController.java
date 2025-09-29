@@ -6,10 +6,8 @@ import com.bidnbuy.server.security.JwtProvider;
 import com.bidnbuy.server.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -74,5 +72,14 @@ public class UserController {
                     .build();
             return ResponseEntity.status(401).body(responseDto);
         }
+    }
+
+    //토큰 테스트를 위한 테스트 메서드
+    @GetMapping("/test")
+    public ResponseEntity<?> testAuth(@AuthenticationPrincipal String userId) {
+        ResponseDto responseDto = ResponseDto.builder()
+                .error("Authenticated! userId: " + userId)
+                .build();
+        return ResponseEntity.ok().body(responseDto);
     }
 }
