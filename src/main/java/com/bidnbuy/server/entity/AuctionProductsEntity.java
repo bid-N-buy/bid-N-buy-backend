@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 // 경매상품 테이블
 @Builder
@@ -30,6 +32,14 @@ public class AuctionProductsEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "wishlist_id", nullable = false)
     private WishLisEntity wishlist;
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", nullable = false)
+    private CategoryEntity category;
+
+    @OneToMany(mappedBy = "auctionProduct", cascade = CascadeType.ALL)
+    private List<ImageEntity> images = new ArrayList<>();
 
     @Column(name = "title", nullable = false)
     private String title;
@@ -60,6 +70,6 @@ public class AuctionProductsEntity {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "delete_at", nullable = false)
+    @Column(name = "deleted_at", nullable = false)
     private LocalDateTime deleteAt;
 }
