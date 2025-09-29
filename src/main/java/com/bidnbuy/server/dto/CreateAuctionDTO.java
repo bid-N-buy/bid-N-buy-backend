@@ -6,13 +6,15 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @Builder
 public class CreateAuctionDTO {
-    private Long userId;
+    private Long categoryId;
+    private List<ImageDTO> image;
     private String title;
     private String description;
     private int start_price;
