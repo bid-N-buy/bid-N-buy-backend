@@ -2,6 +2,7 @@ package com.bidnbuy.server.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.time.Instant;
 
@@ -10,7 +11,8 @@ import java.time.Instant;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @Entity
-@Table(name = "RefreshToken")
+@Table(name = "refreshtoken")
+@DynamicUpdate
 public class RefreshTokenEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,4 +28,11 @@ public class RefreshTokenEntity {
 
     @Column(name = "expiry_date", nullable = false)
     private Instant expiryDate;
+
+    public void updateToken(String newTokenValue, Instant newExpiryDate){
+        this.tokenValue = newTokenValue;
+        this.expiryDate = newExpiryDate;
+    }
 }
+
+

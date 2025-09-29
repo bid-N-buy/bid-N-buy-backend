@@ -3,10 +3,7 @@ package com.bidnbuy.server.entity;
 import com.bidnbuy.server.enums.AuthStatus;
 import com.bidnbuy.server.enums.UserStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -15,7 +12,8 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name="User")
 public class UserEntity {
@@ -63,5 +61,6 @@ public class UserEntity {
     @Column(name="deleted_at")
     private LocalDateTime deletedAt;
 
-
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private RefreshTokenEntity refreshToken;
 }

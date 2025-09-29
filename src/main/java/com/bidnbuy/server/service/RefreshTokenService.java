@@ -1,0 +1,45 @@
+package com.bidnbuy.server.service;
+
+import com.bidnbuy.server.entity.RefreshTokenEntity;
+import com.bidnbuy.server.entity.UserEntity;
+import com.bidnbuy.server.repository.RefreshTokenRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
+import java.util.Optional;
+
+@Service
+@RequiredArgsConstructor
+public class RefreshTokenService {
+    private final RefreshTokenRepository refreshTokenRepository;
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void saveOrUpdate(UserEntity user, String tokenValue, Instant expiryDate){
+        Optional<RefreshTokenEntity> existingToken = refreshTokenRepository.findByUser(user);
+        if(existingToken.isPresent()){
+            RefreshTokenEntity token = existingToken.get();
+            token.updateToken(tokenValue, expiryDate);
+            refreshTokenRepository.saveAndFlush(token);
+        }else{
+            RefreshTokenEntity newToken = RefreshTokenEntity.builder()
+                    .user(user)
+                    .tokenValue(tokenValue)
+                    .expiryDate(expiryDate)
+                    .build();
+            refreshTokenRepository.save(newToken);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<RefreshTokenEntity> findByTokenValue(String tokenValue){
+        return refreshTokenRepository.findByTokenValue(tokenValue);
+    }
+
+    @Transactional
+    public void deleteByTokenValue(String tokenValue){
+        refreshTokenRepository.findByTokenValue(tokenValue).ifPresent(refreshTokenRepository::delete);
+    }
+}

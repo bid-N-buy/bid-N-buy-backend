@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @Slf4j
 public class UserService {
@@ -67,5 +69,9 @@ public class UserService {
         return null;
     }
 
+    public UserEntity getById(final Long id){
+        Optional<UserEntity> userOptional = repository.findById(id);
+        return userOptional.orElse(null);
+    }
 
 }

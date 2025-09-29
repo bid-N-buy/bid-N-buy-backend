@@ -24,6 +24,10 @@ public class JwtProvider {
     @Value("${jwt.expiration-time}")
     private long EXPIRATION_TIME;
 
+    @Value("${jwt.refresh-expiration-time}")
+    private long REFRESH_EXPIRATION_TIME;
+
+
     private static final String BEARER_TYPE = "Bearer";
 
     private final Map<SecretKey, JwtParser> parserCache = new ConcurrentHashMap<>();
@@ -58,6 +62,28 @@ public class JwtProvider {
                 .compact();//생성, 직렬화
     }
 
+    //refresh token 생성
+    public String createRefreshToken(long userId){
+        Date now = new Date();
+        Date expiration = Date.from(Instant.now()
+                .plus(REFRESH_EXPIRATION_TIME, ChronoUnit.MILLIS));
+
+        try{
+            String token =Jwts.builder()
+                .signWith(getSigningKey(), Jwts.SIG.HS512) //알고리즘 키 설정
+                .setSubject(String.valueOf(userId)) //토큰 사용자
+                .setIssuer("bidnbuy-api")  //토큰 발급자
+                .setIssuedAt(now) //발급시간
+                .setExpiration(expiration)//만료시간
+                .compact();//생성, 직렬화
+            log.info("refresh token created success for user :{}", userId);
+            return token;
+        }catch (Exception e){
+            log.error("Refresh Token Creation Failed for user {}! Cause: {}", userId, e.getMessage(), e);
+        }
+        return null;
+    }
+
     //jwt토큰 검증, 파싱
     public String validateAndGetUserId(String token){
         try{
@@ -75,6 +101,11 @@ public class JwtProvider {
             log.error("JWT claims string is empty: {}", e.getMessage());
         }
         return null;
+    }
+
+    //refresh token 만료시간 instant객체로 반환
+    public Instant getRefreshTokenExpiryDate(){
+        return Instant.now().plus(REFRESH_EXPIRATION_TIME, ChronoUnit.MILLIS);
     }
 
     public long getAccessTokenExpirationTime(){
