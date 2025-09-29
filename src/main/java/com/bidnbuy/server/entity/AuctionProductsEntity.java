@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -26,13 +27,12 @@ public class AuctionProductsEntity {
     private Long auctionId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private UserEntity user;
+    @JoinColumn(name = "wishlist_id", nullable = false)
+    private WishlistEntity wishlist;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "wishlist_id", nullable = false)
-    private WishLisEntity wishlist;
-
+    @JoinColumn(name = "user_id", nullable = false)
+    private UserEntity user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
@@ -70,6 +70,7 @@ public class AuctionProductsEntity {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "deleted_at", nullable = false)
-    private LocalDateTime deleteAt;
+    @ColumnDefault("'1970-01-01 00:00:00'")
+    @Column(name = "delete_at", nullable = true) // nullable=true만 남김
+    private LocalDateTime deletedAt;
 }
