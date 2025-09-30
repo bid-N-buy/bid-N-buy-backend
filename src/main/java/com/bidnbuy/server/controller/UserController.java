@@ -8,14 +8,18 @@ import com.bidnbuy.server.security.JwtProvider;
 import com.bidnbuy.server.service.AuthService;
 import com.bidnbuy.server.service.RefreshTokenService;
 import com.bidnbuy.server.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 import java.util.Optional;
 
+@Slf4j
 @RestController
 @RequestMapping("/auth")
 public class UserController {
@@ -86,10 +90,15 @@ public class UserController {
 
     //토큰 테스트를 위한 테스트 메서드
     @GetMapping("/test")
-    public ResponseEntity<?> testAuth(@AuthenticationPrincipal String userId) {
+    public ResponseEntity<?> testAuth() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        log.info("@@@@@@@@@@@@@@@@@@@@2Authentication: {}", authentication);
+        Long userId = (Long) authentication.getPrincipal();
+
         ResponseDto responseDto = ResponseDto.builder()
-                .error("Authenticated! userId: " + userId)
+                .message("Authenticated! userId: " + userId)
                 .build();
+
         return ResponseEntity.ok().body(responseDto);
     }
 }

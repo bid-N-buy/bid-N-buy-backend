@@ -13,5 +13,6 @@ import java.util.List;
 @Data
 public class ResponseDto<T> {
     private String error;
+    private String message;
     private List<T> data;
 }

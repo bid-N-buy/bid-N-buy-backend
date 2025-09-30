@@ -50,8 +50,8 @@ public class JwtProvider {
     public String createAccessToken(long userId){
         Date now = new Date();
         //만료시간 설정
-        Date expiration = Date.from(Instant.now()
-                .plus(EXPIRATION_TIME, ChronoUnit.MILLIS));
+        long expirationTimeMs = now.getTime() + EXPIRATION_TIME;
+        Date expiration = new Date(expirationTimeMs);
 
         return Jwts.builder()
                 .signWith(getSigningKey(), Jwts.SIG.HS512) //알고리즘 키 설정
@@ -65,8 +65,8 @@ public class JwtProvider {
     //refresh token 생성
     public String createRefreshToken(long userId){
         Date now = new Date();
-        Date expiration = Date.from(Instant.now()
-                .plus(REFRESH_EXPIRATION_TIME, ChronoUnit.MILLIS));
+        long expirationTimeMs = now.getTime() + EXPIRATION_TIME;
+        Date expiration = new Date(expirationTimeMs);
 
         try{
             String token =Jwts.builder()

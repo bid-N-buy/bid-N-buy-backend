@@ -33,10 +33,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request){
         String path = request.getRequestURI();
-
-        if(path.startsWith("/auth/")){
+        
+        if(path.equals("/auth/signup") || path.equals("/auth/login")){
             return true;
-        }
+        }//인증 필터링 건너뛰기
         return false;
     }
 
@@ -62,6 +62,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             AuthorityUtils.createAuthorityList("ROLE_USER")
                     );
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+//                    authentication.setAuthenticated(true);
+//                    SecurityContextHolder.getContext().setAuthentication(authentication);
 
                     SecurityContext securityContext =  SecurityContextHolder.createEmptyContext();
                     securityContext.setAuthentication(authentication);
@@ -77,9 +79,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     //HTTP 헤더에서 Bearer{Token} 형태 토큰 추출
     private String parseBearerToken(HttpServletRequest request){
         String bearerToken = request.getHeader("Authorization");
-        if(StringUtils.hasText(bearerToken)&& bearerToken.startsWith(jwtProvider.getGrantType()+" ")){
+//        log.info("%%%%%%%%%%%%%%5Authorization Header: {}", bearerToken);
+        if(StringUtils.hasText(bearerToken)&& bearerToken.startsWith("Bearer ")){
             //순수 토큰 값 반환
-            return bearerToken.substring(jwtProvider.getGrantType().length()+1);
+            return bearerToken.substring(7);
         }
         return null;
     }
