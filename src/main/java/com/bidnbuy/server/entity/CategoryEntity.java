@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 
+// 카테고리 테이블
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
