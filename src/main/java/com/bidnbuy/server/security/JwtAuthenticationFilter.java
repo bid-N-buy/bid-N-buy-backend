@@ -34,10 +34,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request){
         String path = request.getRequestURI();
-//        log.info("###################3shouldNotFilter path: {}", path);
+        log.info("###################3shouldNotFilter path: {}", path);
 //        if(path.startsWith("/auth")){
         if(path.equals("/auth/signup") || path.equals("/auth/login") || path.equals("/favicon.ico") || path.startsWith("/auth/kakao")
-                || path.startsWith("/auth/naver")){
+                || path.startsWith("/auth/naver")|| path.startsWith("/auth/email")){
             return true;
         }//인증 필터링 건너뛰기
         return false;
@@ -82,7 +82,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     //HTTP 헤더에서 Bearer{Token} 형태 토큰 추출
     private String parseBearerToken(HttpServletRequest request){
         String bearerToken = request.getHeader("Authorization");
-//        log.info("%%%%%%%%%%%%%%5Authorization Header: {}", bearerToken);
+        log.info("%%%%%%%%%%%%%%5Authorization Header: {}", bearerToken);
         if(StringUtils.hasText(bearerToken)&& bearerToken.startsWith("Bearer ")){
             //순수 토큰 값 반환
             return bearerToken.substring(7);

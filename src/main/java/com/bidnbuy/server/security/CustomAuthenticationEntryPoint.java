@@ -15,7 +15,9 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException) throws IOException{
-        log.error("인증되지 않은 사용자 접근(unauthorized):{}", authException.getMessage());
+//        log.error("################>>> Unauthorized at {}: {}", request.getRequestURI(), authException.getMessage(), authException);
+
+//        log.error("인증되지 않은 사용자 접근(unauthorized):{}", authException.getMessage());
 
         response.setContentType("application/json;charset=UTF-8");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
