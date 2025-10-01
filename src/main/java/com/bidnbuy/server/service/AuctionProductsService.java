@@ -1,9 +1,6 @@
 package com.bidnbuy.server.service;
 
-import com.bidnbuy.server.dto.CreateAuctionDto;
-import com.bidnbuy.server.dto.ImageDto;
-import com.bidnbuy.server.dto.PagingResponseDto;
-import com.bidnbuy.server.dto.AuctionListResponseDto;
+import com.bidnbuy.server.dto.*;
 import com.bidnbuy.server.entity.*;
 import com.bidnbuy.server.enums.SellingStatus;
 import com.bidnbuy.server.repository.*;
@@ -16,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class AuctionProductsService {
@@ -31,7 +29,6 @@ public class AuctionProductsService {
     @Autowired
     private ImageRepository imageRepository;
 
-    @Autowired ImageService imageService;
     // create
     @Transactional
     public AuctionProductsEntity create(CreateAuctionDto dto, List<ImageDto> images, Long userId) {
@@ -64,6 +61,16 @@ public class AuctionProductsService {
         // 이미지 검증
         if(images == null || images.size() == 0 ||images.size() > 10) {
             throw new IllegalArgumentException("이미지는 1장 이상 10장 이하로 등록해야 합니다.");
+        }
+
+        for(ImageDto imageDto:images) {
+            ImageEntity imageEntity = ImageEntity.builder()
+                    .imageUrl(imageDto.getImageUrl())
+                    .imageType(imageDto.getImageType())
+                    .auctionProduct(auctionProduct)
+                    .build();
+
+            imageRepository.save(imageEntity);
         }
         return auctionProducts;
     }
@@ -114,6 +121,32 @@ public class AuctionProductsService {
         }
 }
 
-//    @Transactional(readOnly = true)
-//    public AuctionDe
+    @Transactional(readOnly = true)
+    public AuctionFindDto getAuctionFind(Long auctionId, Long userId) {
+        AuctionProductsEntity products = auctionProductsRepository.findByIdWithDetails(auctionId)
+                .orElseThrow(() -> new IllegalArgumentException("Auction Not Found with ID: " + auctionId));
+
+        List<ImageDto> imageDtos = imageRepository.findAllByAuctionProduct_AuctionId(auctionId)
+                .stream()
+                .map(imageEntity -> ImageDto.builder()
+                        .imageUrl(imageEntity.getImageUrl())
+                        .imageType(imageEntity.getImageType())
+                        .build())
+                .collect(Collectors.toList());
+
+        String sellingStatus = calculateSellingStatus(products);
+
+        return AuctionFindDto.builder()
+                .auctionId(products.getAuctionId())
+                .title(products.getTitle())
+                .description(products.getDescription())
+                .startPrice(products.getStartPrice())
+                .currentPrice(products.getCurrentPrice())
+                .minBidPrice(products.getMinBidPrice())
+                .endTime(products.getEndTime())
+                .sellerId(products.getUser().getUserId())
+                .sellerNickname(products.getUser().getNickname())
+                .images(imageDtos)
+                .build();
+    }
 }

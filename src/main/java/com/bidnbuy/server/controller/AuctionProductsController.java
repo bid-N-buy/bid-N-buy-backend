@@ -1,9 +1,6 @@
 package com.bidnbuy.server.controller;
 
-import com.bidnbuy.server.dto.AuctionListResponseDto;
-import com.bidnbuy.server.dto.CreateAuctionDto;
-import com.bidnbuy.server.dto.ImageDto;
-import com.bidnbuy.server.dto.PagingResponseDto;
+import com.bidnbuy.server.dto.*;
 import com.bidnbuy.server.entity.AuctionProductsEntity;
 import com.bidnbuy.server.service.AuctionProductsService;
 import jakarta.validation.Valid;
@@ -53,5 +50,13 @@ public class AuctionProductsController {
         return ResponseEntity.ok(list);
     }
 
+    @GetMapping("/{auctionId}")
+    public ResponseEntity<?> getAuctionFind(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable Long auctionId
+    ){
+        AuctionFindDto find = auctionProductsService.getAuctionFind(auctionId, userId);
+        return ResponseEntity.ok(find);
+    }
 
 }

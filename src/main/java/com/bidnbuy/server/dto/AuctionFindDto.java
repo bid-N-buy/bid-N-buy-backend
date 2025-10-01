@@ -22,9 +22,8 @@ public class AuctionFindDto {
     private Integer minBidPrice;
 
     // 3. 시간 정보
-    private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private LocalDateTime createdAt;
+
 
     // 4. 판매자 정보 (다른 Entity에서 가져와야 함)
     private Long sellerId;
