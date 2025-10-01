@@ -23,11 +23,11 @@ public class EmailVerificationEntity {
     @Column(name = "email_id", nullable = false)
     private long emailId;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name="user_id")
     private UserEntity userId;
 
-    @Column(name = "email", nullable = false, length = 255)
+    @Column(name = "email", nullable = false, length = 255, unique = true)
     private String email;
 
     @Column(name = "valid_code", nullable = false, length = 50)

@@ -17,12 +17,12 @@ public class UserService {
 //    private UserRepository repository;
     private final UserRepository repository; //불변성, 초기화 문제 해결을 위해 @Autowired 대신 final이랑 생성자 주입으로 바꿈
     private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
 
-
-
-    public UserService(UserRepository repository, PasswordEncoder passwordEncoder){
+    public UserService(UserRepository repository, PasswordEncoder passwordEncoder, UserRepository userRepository){
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
+        this.userRepository = userRepository;
     }
 
     private static final String PASSWORD_REGEX =
@@ -77,6 +77,10 @@ public class UserService {
     public UserEntity getById(final Long id){
         Optional<UserEntity> userOptional = repository.findById(id);
         return userOptional.orElse(null);
+    }
+
+    public Optional<UserEntity> findByEmail(String email){
+        return userRepository.findByEmail(email);
     }
 
     @Transactional
