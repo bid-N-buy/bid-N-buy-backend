@@ -1,6 +1,7 @@
 package com.bidnbuy.server.controller;
 
 import com.bidnbuy.server.dto.WishlistDto;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.bidnbuy.server.service.WishlistService;
@@ -12,10 +13,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 @RestController
 @RequestMapping("/wishs")
-@RequiredArgsConstructor
 public class WishlistController {
 
-    private final WishlistService wishlistService;
+    @Autowired
+    private  WishlistService wishlistService;
 
     // POST /auctions/{auctionId}/like : 찜(좋아요) 상태를 토글(등록 또는 취소)
     @PostMapping("/{auctionId}/like")
