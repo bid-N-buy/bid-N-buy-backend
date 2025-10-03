@@ -158,18 +158,28 @@ public class UserService {
     }
 
     //비밀번호 업데이트
-    public void updatePassword(UserEntity user, String newPw){
-        String hashedPw = passwordEncoder.encode(newPw);
+    public void updatePassword(UserEntity user, String newPassword){
+        String hashedPw = passwordEncoder.encode(newPassword);
         user.setPassword(hashedPw);
         userRepository.save(user);
     }
 
     //비밀번호 최종 재설정
-    public void finalResetPassword(String email, String newPw){
+    public void finalResetPassword(String email, String newPassword){
         UserEntity user =  findByEmail(email)
                 .orElseThrow(()->new UsernameNotFoundException("user not found:{}" +email));
         clearTempPw(user);
-        updatePassword(user, newPw);
+        updatePassword(user, newPassword);
     }
 
+    //비밀번호 재설정(로그인한 상태에서 단순 변경)
+    public void changePassword(Long userId, String currentPassword, String newPassword){
+        UserEntity user =  userRepository.findById(userId)
+                .orElseThrow(()->new UsernameNotFoundException("user not found:{}" +userId));
+
+        if(!passwordEncoder.matches(currentPassword, user.getPassword())){
+            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
+        }
+        updatePassword(user, newPassword);
+    }
 }
