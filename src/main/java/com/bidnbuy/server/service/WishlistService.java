@@ -1,0 +1,68 @@
+package com.bidnbuy.server.service;
+
+import com.bidnbuy.server.dto.WishlistDto;
+import com.bidnbuy.server.entity.AuctionProductsEntity;
+import com.bidnbuy.server.entity.UserEntity;
+import com.bidnbuy.server.entity.WishlistEntity;
+import com.bidnbuy.server.enums.IsDeletedStatus;
+import com.bidnbuy.server.repository.AuctionProductsRepository;
+import com.bidnbuy.server.repository.UserRepository;
+import com.bidnbuy.server.repository.WishlistRepository;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+
+@Service
+@RequiredArgsConstructor
+public class WishlistService {
+    private final WishlistRepository wishlistRepository;
+    private final UserRepository userRepository;
+    private final AuctionProductsRepository auctionProductsRepository;
+
+    @Transactional
+    public WishlistDto like(Long userId, Long auctionId) {
+
+        // 1. 유저 존재하는지 확인
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("해당 유저 ID가 없습니다"));
+
+        // 2. 해당 경매 물품이 있는지 확인
+        AuctionProductsEntity auction = auctionProductsRepository.findById(auctionId)
+                .orElseThrow(() -> new RuntimeException("해당 경매 물품 ID가 없습니다"));
+
+        // 3. 찜 상태 확인 -> 로그인한 사용자가 경매 물품을 찜했는지 찾는다.
+        return wishlistRepository.findByUserAndAuction(user, auction)
+                .map(wishlist -> {
+                    // 4. 찜이 존재하면 -> 찜 취소(DELETE)
+                    wishlistRepository.delete(wishlist);
+
+                    // 5. 삭제 후, 총 찜 개수와 상태를 반환
+                    long likeCount = wishlistRepository.countByAuction(auction);
+                    return WishlistDto.builder()
+                            .isLiked(false) // 찜 취소됨
+                            .likeCount(likeCount)
+                            .auctionId(auctionId)
+                            .build();
+                })
+                .orElseGet(() -> {
+                    // 6. 찜이 존재하지 않으면 -> 찜 등록(CREATE)
+                    WishlistEntity newWishlist = WishlistEntity.builder()
+                            .user(user)
+                            .auction(auction)
+                            .createdAt(LocalDateTime.now())
+                            .isDeleted(IsDeletedStatus.N)
+                            .build();
+                    wishlistRepository.save(newWishlist);
+
+                    // 7. 등록 후, 총 찜 개수와 상태를 반환
+                    long likeCount = wishlistRepository.countByAuction(auction);
+                    return WishlistDto.builder()
+                            .isLiked(true) // 찜 등록됨
+                            .likeCount(likeCount)
+                            .auctionId(auctionId)
+                            .build();
+                });
+    }
+}
