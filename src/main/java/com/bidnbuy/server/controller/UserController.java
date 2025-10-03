@@ -184,6 +184,28 @@ public class UserController {
         }
     }
 
+    //마이페이지에서 비밀번호 재설정
+    @PostMapping("/user/password/change")
+    public ResponseEntity<?> changePassword(@RequestBody PasswordChangeRequestDto requestDto){
+        try{
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            Long userId = Long.parseLong(authentication.getName());
+
+            userService.changePassword(
+                    userId,
+                    requestDto.getCurrentPassword(),
+                    requestDto.getNewPassword()
+            );
+            return ResponseEntity.ok().body("비밀번호가 성공적으로 변경되었습니다.");
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("사용자 정보를 찾을 수 없습니다.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+        }
+    }
+
     //토큰 테스트를 위한 테스트 메서드
     @GetMapping("/test")
     public ResponseEntity<?> testAuth() {
