@@ -182,4 +182,14 @@ public class UserService {
         }
         updatePassword(user, newPassword);
     }
+
+    //회원 탈퇴
+    public void deleteUser(Long userId, String inputPassword){
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(()->new UsernameNotFoundException("user not found:{}" +userId));
+        if(!passwordEncoder.matches(inputPassword, user.getPassword())) {
+            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
+        }
+        userRepository.deleteById(userId);
+    }
 }
