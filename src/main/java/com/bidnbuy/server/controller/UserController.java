@@ -206,6 +206,14 @@ public class UserController {
         }
     }
 
+    //회원탈퇴
+    @DeleteMapping("/user/{userId}")
+    public ResponseEntity<?> deleteUser(@PathVariable Long userId, @RequestBody DeleteUserDto requestDto){
+        String inputPassword = requestDto.getPassword();
+        userService.deleteUser(userId, inputPassword);
+        return ResponseEntity.noContent().build();
+    }
+
     //토큰 테스트를 위한 테스트 메서드
     @GetMapping("/test")
     public ResponseEntity<?> testAuth() {
