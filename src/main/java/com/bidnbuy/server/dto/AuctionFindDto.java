@@ -34,6 +34,8 @@ public class AuctionFindDto {
     // 5. 판매자 정보 (다른 Entity에서 가져와야 함)
     private Long sellerId;
     private String sellerNickname; // 💡 User Entity에서 닉네임 등을 가져와 표시
+    private String sellerProfileImageUrl;
+    private Double sellerTemperature;
 
 
     // 6. (선택) 경매 상태: "진행 중", "마감 임박", "종료" 등을 반환할 수 있음
