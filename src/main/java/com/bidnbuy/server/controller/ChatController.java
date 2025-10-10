@@ -24,6 +24,7 @@ public class ChatController {
     @MessageMapping("/chat/message")
     public void sendMessage(@Payload ChatMessageRequestDto requestDto, SimpMessageHeaderAccessor accessor){
         Principal principal = accessor.getUser();
+
         if(principal == null){
             log.error("Principal is null. STOMP 세션에 인증 정보가 없어 메시지 전송을 거부합니다. (Principal: {})", principal);
             return;
@@ -31,7 +32,7 @@ public class ChatController {
 
         Long senderId;
         try{
-            senderId = (Long) ((Authentication)principal).getPrincipal();
+            senderId = Long.parseLong(principal.getName());
         }catch (Exception e){
             log.error("인증된 사용자 ID 추출 실패 (Long 캐스팅 오류 또는 Principal 구조 불일치): {}", e.getMessage());
             return;
@@ -40,7 +41,7 @@ public class ChatController {
 
         ChatMessageDto saveMessage = chatMessageService.saveAndProcessMessage(requestDto, senderId);
 
-        String destination = "/topic/chat/room"+requestDto.getChatroomId();
+        String destination = "/topic/chat/room/"+requestDto.getChatroomId();
         messageSendingTemplate.convertAndSend(destination, saveMessage);
 
         log.info("메세지 브로드캐스트 : destination={}", destination);

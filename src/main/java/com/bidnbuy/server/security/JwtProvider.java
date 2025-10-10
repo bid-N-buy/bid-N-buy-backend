@@ -169,4 +169,28 @@ public class JwtProvider {
 
         return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
     }
+
+    //토큰 유효성 검증
+    public boolean parseAndValidateToken(String token) {
+        try {
+            getClaims(token); // 파싱 성공하면 유효
+            return true;
+        } catch (Exception e) {
+            log.error(" JWT validation failed: {}", e.getMessage());
+            return false;
+        }
+    }
+    // Claims 추출 메서드
+    public Claims getClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+
+    // 토큰에서 (userId) 추출
+    public String getUsername(String token) {
+        return getClaims(token).getSubject();
+    }
 }
