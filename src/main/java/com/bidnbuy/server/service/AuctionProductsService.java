@@ -26,6 +26,7 @@ public class AuctionProductsService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final ImageRepository imageRepository;
+    private final WishlistRepository wishlistRepository;
 
     // create -> 인증된 사용자만 등록 유저 검증 필요,
     @Transactional
@@ -114,6 +115,9 @@ public class AuctionProductsService {
         // 4. DTO
         List<AuctionListResponseDto> dtoList = auctionPage.getContent().stream()
                 .map(product -> {
+                    // 찜 개수 조회
+                    Integer wishCount= wishlistRepository.countByAuction(product);
+                    // 메인 이미지
                     String mainImageUrl = imageRepository.findMainImageUrl(product.getAuctionId())
                             .orElse("default_product.png");
 
@@ -126,6 +130,7 @@ public class AuctionProductsService {
                             .categoryName(product.getCategory().getCategoryName())
                             .sellerNickname(product.getUser().getNickname())
                             .mainImageUrl(mainImageUrl)
+                            .wishCount(wishCount)
                             .build();
                 })
                 .toList();
@@ -143,7 +148,7 @@ public class AuctionProductsService {
     }
 
     //  경매 상태
-    private String calculateSellingStatus(AuctionProductsEntity product) {
+    public String calculateSellingStatus(AuctionProductsEntity product) {
         return switch (product.getSellingStatus()) {
             case PROGRESS -> {
                 LocalDateTime now = LocalDateTime.now();
@@ -177,6 +182,9 @@ public class AuctionProductsService {
 
         String sellingStatus = calculateSellingStatus(products);
 
+        // 찜 개수
+        Integer wishCount = wishlistRepository.countByAuction(products);
+
         return AuctionFindDto.builder()
                 .auctionId(products.getAuctionId())
                 .title(products.getTitle())
@@ -192,9 +200,10 @@ public class AuctionProductsService {
                 .categoryName(products.getCategory().getCategoryName())
                 .sellerId(products.getUser().getUserId())
                 .sellerNickname(products.getUser().getNickname())
+                //.sellerProfileImageUrl(products.getUser().getProfileImageUrl())
                 .images(imageDtos)
                 .sellingStatus(sellingStatus)
-             //   .wishCount(products)
+                .wishCount(wishCount)
                 .build();
     }
 
