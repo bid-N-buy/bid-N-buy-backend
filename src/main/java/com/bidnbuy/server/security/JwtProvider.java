@@ -3,8 +3,14 @@ package com.bidnbuy.server.security;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecurityException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -19,7 +25,11 @@ import io.jsonwebtoken.Jwts;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class JwtProvider {
+
+    private final UserDetailsService userDetailsService;
+
     @Value("${jwt.secret-key}")
     private String SECRET_KEY;
 
@@ -108,6 +118,16 @@ public class JwtProvider {
     //토큰 유효성 검증
     public boolean validateToken(String token){
         return validateAndGetUserId(token) !=null;
+    }
+
+    //토큰에서 userId추출해서 authentication객체 생성
+    public Authentication getAuthentication(String token){
+        Claims claims = getParser()
+                .parseSignedClaims(token)
+                .getPayload();
+        String userId = claims.getSubject();
+        UserDetails userDetails = userDetailsService.loadUserByUsername(userId);
+        return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     }
 
     //RTR(리프레시토큰 회전)을 위한 메서드
