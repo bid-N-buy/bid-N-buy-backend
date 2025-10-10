@@ -102,6 +102,7 @@ public class JwtProvider {
             Claims claims = getParser()
                     .parseSignedClaims(token)
                     .getPayload();
+            log.info("토큰 검증 성공 (validateToken: true), 사용자 ID: {}", claims.getSubject());
             return claims.getSubject();//토큰에서 userId추출
         }catch (SecurityException| MalformedJwtException e){
             log.error("Invalid JWT signature: {}", e.getMessage());
@@ -112,6 +113,7 @@ public class JwtProvider {
         } catch (IllegalArgumentException e) {
             log.error("JWT claims string is empty: {}", e.getMessage());
         }
+        log.warn("토큰 검증 실패 (validateToken: false)");
         return null;
     }
 
@@ -137,8 +139,10 @@ public class JwtProvider {
                     .parseSignedClaims(token)
                     .getPayload()
                     .getSubject();
+            log.info("FromToken: 사용자 Long ID 추출 성공: {}", userId);
             return Long.parseLong(userId);
         }catch (Exception e){
+            log.error("FromToken: 사용자 Long ID 추출 실패: {}", e.getMessage());
             log.error("error extracting UserId from token:{}", e.getMessage());
             throw new RuntimeException("토큰에서 사용자 정보를 추출할 수 없음");
         }
