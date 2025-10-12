@@ -76,7 +76,7 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .requestMatchers("/auth/signup", "/auth/login", "/auth/kakao","/favicon.ico", "/auth/naver", "/auth/reissue"
                             , "/auth/naver/loginstart", "/auth/email/**", "/auth/password/**", "/chat_test.html**", "/ws/bid/**").permitAll()
-                    .anyRequest().authenticated()
+                    .anyRequest().permitAll()
             ).csrf(csrf -> csrf.disable());
 
         http.addFilterAfter(
