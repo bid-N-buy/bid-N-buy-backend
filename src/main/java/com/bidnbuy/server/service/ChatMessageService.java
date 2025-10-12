@@ -10,10 +10,13 @@ import com.bidnbuy.server.repository.ChatRoomRepository;
 import com.bidnbuy.server.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.aop.target.LazyInitTargetSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -56,4 +59,29 @@ public class ChatMessageService {
                 .isRead(savedEntity.isRead())
                 .build();
     }
+
+    @Transactional(readOnly = true)
+    public List<ChatMessageDto> getMessageByChatRoomId(Long chatroomId){
+        ChatRoomEntity chatRoom = chatRoomRepository.findById(chatroomId)
+                .orElseThrow(()-> new EntityNotFoundException("채팅방을 찾을 수 없습니다."));
+        List<ChatMessageEntity> messages = chatMessageRepository.findByChatroomIdOrderByCreateAt(chatRoom);
+
+        return messages.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    private ChatMessageDto convertToDto(ChatMessageEntity entity){
+        return ChatMessageDto.builder()
+                .chatmessageId(String.valueOf(entity.getChatmessageId()))
+                .chatroomId(String.valueOf(entity.getChatroomId().getChatroomId()))
+                .senderId(String.valueOf(entity.getSenderId().getUserId()))
+                .message(entity.getMessage())
+                .imageUrl(entity.getImageUrl())
+                .messageType(entity.getMessageType())
+                .createdAt(entity.getCreateAt())
+                .isRead(entity.isRead())
+                .build();
+    }
+
 }
