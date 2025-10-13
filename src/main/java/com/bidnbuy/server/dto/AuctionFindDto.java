@@ -25,7 +25,9 @@ public class AuctionFindDto {
 
     // 2. 카테고리 정보
     private Integer categoryId;
-    private String categoryName; // 카테고리 이름
+    // private String categoryName; // 카테고리 이름
+    private String categoryMain;
+    private String categorySub;
 
     // 3. 가격 및 입찰 정보
     private Integer currentPrice; // 현재가
@@ -36,7 +38,6 @@ public class AuctionFindDto {
     private LocalDateTime startTime;
     private LocalDateTime createdAt;
     private LocalDateTime endTime;
-    private LocalDateTime updatedAt;
 
     // 5. 판매자 정보 (다른 Entity에서 가져와야 함)
     private Long sellerId;
@@ -51,25 +52,51 @@ public class AuctionFindDto {
     // 7. 찜 카운트
     private Integer wishCount;
 
+
     public AuctionFindDto(AuctionProductsEntity entity) {
-//        this.auctionId = entity.getAuctionId();
-//        this.title = entity.getTitle();
-//        this.description = entity.getDescription();
-//        this.categoryId =  entity.getCategory().getCategoryId();
-//        this.categoryName =entity.getCategory().getCategoryName();
-//        this.currentPrice = entity.getCurrentPrice();
-//        this.minBidPrice = entity.getMinBidPrice();
-//        this.bidCount = entity.getBidCount();
-//        this.startTime = entity.getStartTime();
-//        this.endTime = entity.getEndTime();
-//        this.createdAt = entity.getCreatedAt();
-//        this.sellerId = entity.getUser().getUserId();
-//        this.sellerNickname = entity.getUser().getNickname();
-//       // this.wishCount = entity.getWishes().size();
-//        this.sellerProfileImageUrl = entity.getUser().getProfileImageUrl();
-//
-//        this.images = entity.getImages().stream()
-//                .map(ImageDto::new) // ImageDto에 정적 팩토리 메서드 from(ImageEntity)가 있다고 가정
-//                .collect(Collectors.toList());
+        this.auctionId = entity.getAuctionId();
+        this.title = entity.getTitle();
+        this.description = entity.getDescription();
+
+        // 💡 카테고리 정보 매핑 (CategoryEntity에 Main/Sub 필드가 없다고 가정)
+        this.categoryId = entity.getCategory().getCategoryId();
+        String fullCategoryName = entity.getCategory().getCategoryName();
+
+        String[] parts = fullCategoryName.split("/");
+
+        // 메인 카테고리 할당
+        if (parts.length >= 1) {
+            this.categoryMain = parts[0].trim();
+        } else {
+            this.categoryMain = fullCategoryName.trim(); // 분리할 수 없으면 전체 이름을 Main으로
+        }
+
+        // 서브 카테고리 할당
+        if (parts.length >= 2) {
+            this.categorySub = parts[1].trim();
+        } else {
+            this.categorySub = null; // 서브 카테고리가 없는 경우
+        }
+
+
+        // 가격 및 입찰 정보
+        this.currentPrice = entity.getCurrentPrice();
+        this.minBidPrice = entity.getMinBidPrice();
+        this.bidCount = entity.getBidCount();
+
+        // 시간 정보
+        this.startTime = entity.getStartTime();
+        this.endTime = entity.getEndTime();
+        this.createdAt = entity.getCreatedAt();
+
+        // 판매자 정보
+        this.sellerId = entity.getUser().getUserId();
+        this.sellerNickname = entity.getUser().getNickname();
+        this.sellerProfileImageUrl = entity.getUser().getProfileImageUrl();
+
+        // 이미지 정보
+        this.images = entity.getImages().stream()
+                .map(ImageDto::new)
+                .collect(Collectors.toList());
    }
 }
