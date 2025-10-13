@@ -228,6 +228,19 @@ public class AuctionProductsService {
 
         final Double DEFAULT_TEMP = 36.5;
 
+        String fullCategoryName = products.getCategory().getCategoryName(); // 예: "생활/가전"
+        String mainCategory = fullCategoryName; // 기본값은 전체 이름
+        String subCategory = null;
+
+        String[] parts = fullCategoryName.split("/");
+
+        if (parts.length >= 1) {
+            mainCategory = parts[0].trim();
+        }
+        if (parts.length >= 2) {
+            subCategory = parts[1].trim();
+        }
+
         return AuctionFindDto.builder()
                 .auctionId(products.getAuctionId())
                 .title(products.getTitle())
@@ -239,7 +252,9 @@ public class AuctionProductsService {
                 .createdAt(products.getCreatedAt())
                 .endTime(products.getEndTime())
                 .categoryId(products.getCategory().getCategoryId())
-                .categoryName(products.getCategory().getCategoryName())
+                //.categoryName(products.getCategory().getCategoryName())
+                .categoryMain(mainCategory)
+                .categorySub(subCategory)
                 .sellerId(products.getUser().getUserId())
                 .sellerNickname(products.getUser().getNickname())
                 .sellerProfileImageUrl(products.getUser().getProfileImageUrl())
