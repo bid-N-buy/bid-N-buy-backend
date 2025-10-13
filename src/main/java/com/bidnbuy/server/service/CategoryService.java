@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 // 카테고리 서비스
@@ -15,6 +16,18 @@ import java.util.stream.Collectors;
 public class CategoryService {
     @Autowired
     private CategoryRepository categoryRepository;
+
+    // 단일 카테고리 조회
+    @Transactional(readOnly = true)
+    public CategoryDto findById(Integer categoryId) {
+        Optional<CategoryEntity> optionalCategory = categoryRepository.findById(categoryId);
+
+        if(optionalCategory.isEmpty()) {
+            return null;
+        }
+
+        return CategoryDto.from(optionalCategory.get());
+    }
 
     // 대분류
     @Transactional(readOnly = true)
