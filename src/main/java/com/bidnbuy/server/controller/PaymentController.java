@@ -1,6 +1,7 @@
 package com.bidnbuy.server.controller;
 
 import com.bidnbuy.server.config.TossPaymentClient;
+import com.bidnbuy.server.dto.PaymentPendingResponseDto;
 import com.bidnbuy.server.dto.PaymentRequestDTO;
 import com.bidnbuy.server.dto.PaymentResponseDto;
 import com.bidnbuy.server.dto.SaveAmountRequest;
@@ -43,8 +44,7 @@ public class PaymentController {
             log.info("✅ Payment pending saved: merchantOrderId={}, amount={}",
                     payment.getMerchantOrderId(), payment.getTotalAmount());
 
-
-            return ResponseEntity.ok(payment);
+            return ResponseEntity.ok(new PaymentPendingResponseDto(payment));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(
                     PaymentErrorResponse.builder()
@@ -61,8 +61,14 @@ public class PaymentController {
     @PostMapping("/confirm")
     public ResponseEntity<?> confirmPayment(@RequestBody PaymentRequestDTO request) {
         try {
-            // 1) Toss 승인 요청
+            log.info("Confirm 요청: paymentKey={}, orderId={}, amount={}",
+                    request.getPaymentKey(), request.getOrderId(), request.getAmount());
+
+            // 1) Toss 승인 요청 : paymentKey, orderId(mercharId), amount만
             HttpResponse<String> response = tossPaymentClient.requestConfirm(request);
+            log.info("📡 Toss Confirm Response status={} body={}", response.statusCode(), response.body());
+
+
 
 
             if (response.statusCode() != 200) {
@@ -77,7 +83,7 @@ public class PaymentController {
             // 3) DB 갱신
             PaymentEntity payment = paymentService.saveConfirmedPayment(dto);
 
-            return ResponseEntity.ok(payment);
+            return ResponseEntity.ok(response.body());
 
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(

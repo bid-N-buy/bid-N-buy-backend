@@ -33,6 +33,13 @@ public class PaymentService {
      */
     @Transactional
     public PaymentEntity createPendingPayment(OrderEntity order, SaveAmountRequest request) {
+        // 이미 merchantOrderId 가 존재하면 그대로 리턴
+        Optional<PaymentEntity> existing = paymentRepository.findByMerchantOrderId(request.getMerchantOrderId());
+        if (existing.isPresent()) {
+            return existing.get();
+        }
+
+        // 없으면 새로 생성
         PaymentEntity payment = new PaymentEntity();
         payment.setOrder(order);
         payment.setMerchantOrderId(request.getMerchantOrderId());
@@ -52,13 +59,10 @@ public class PaymentService {
                         "Payment not found by merchantOrderId: " + dto.getOrderId()));
 
         payment.setTossPaymentKey(dto.getPaymentKey());
+        payment.setTossPaymentStatus(paymentStatus.PaymentStatus.SUCCESS);
         payment.setTossPaymentStatus(mapToPaymentStatus(dto.getStatus()));
         payment.setTossPaymentMethod(mapToPaymentMethod(dto.getMethod()));
 
-        if (dto.getRequestedAt() != null) {
-            OffsetDateTime odt = OffsetDateTime.parse(dto.getRequestedAt());
-            payment.setRequestedAt(odt.toLocalDateTime());
-        }
         if (dto.getApprovedAt() != null) {
             OffsetDateTime odt = OffsetDateTime.parse(dto.getApprovedAt());
             payment.setApprovedAt(odt.toLocalDateTime());

@@ -4,6 +4,7 @@ import com.bidnbuy.server.dto.PaymentRequestDTO;
 import com.bidnbuy.server.dto.PaymentResponseDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -15,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 @Component
+@Slf4j
 public class TossPaymentClient {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -29,7 +31,11 @@ public class TossPaymentClient {
         node.put("orderId", req.getOrderId());     // = merchantOrderId
         node.put("amount", req.getAmount());
 
+
         String requestBody = objectMapper.writeValueAsString(node);
+
+        log.info("📡 Toss Confirm Request body={}", requestBody);
+        log.info("📡 Toss Confirm Auth={}", buildBasicAuthHeader(secretKey));
 
         HttpRequest httpReq = HttpRequest.newBuilder()
                 .uri(URI.create("https://api.tosspayments.com/v1/payments/confirm"))
