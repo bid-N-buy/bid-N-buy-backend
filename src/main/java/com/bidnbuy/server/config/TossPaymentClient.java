@@ -1,8 +1,6 @@
 package com.bidnbuy.server.config;
 
-import com.bidnbuy.server.dto.ConfirmPaymentRequest;
-import com.bidnbuy.server.dto.PaymentResponseDto;
-import com.bidnbuy.server.dto.ConfirmPaymentRequest;
+import com.bidnbuy.server.dto.PaymentRequestDTO;
 import com.bidnbuy.server.dto.PaymentResponseDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -20,12 +18,12 @@ import java.util.Base64;
 public class TossPaymentClient {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final String secretKey = "test_sk_xxxxxx"; // ⚠️ yml에서 주입 권장
+    private final String secretKey = "test_sk_Gv6LjeKD8aE4pK1PvEwk8wYxAdXy"; // ⚠️ yml에서 주입 권장
 
     /**
      * 결제 승인 요청
      */
-    public HttpResponse<String> requestConfirm(ConfirmPaymentRequest req) throws IOException, InterruptedException {
+    public HttpResponse<String> requestConfirm(PaymentRequestDTO req) throws IOException, InterruptedException {
         ObjectNode node = objectMapper.createObjectNode();
         node.put("paymentKey", req.getPaymentKey());
         node.put("orderId", req.getOrderId());     // = merchantOrderId

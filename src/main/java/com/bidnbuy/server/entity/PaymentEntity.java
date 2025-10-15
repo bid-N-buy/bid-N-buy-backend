@@ -2,6 +2,8 @@ package com.bidnbuy.server.entity;
 
 import com.bidnbuy.server.enums.paymentStatus;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -9,6 +11,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "payment")
+@Getter
+@Setter
 public class PaymentEntity {
 
     @Id

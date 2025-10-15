@@ -1,77 +1,69 @@
 package com.bidnbuy.server.controller;
 
 import com.bidnbuy.server.config.TossPaymentClient;
-import com.bidnbuy.server.dto.ConfirmPaymentRequest;
+import com.bidnbuy.server.dto.PaymentRequestDTO;
 import com.bidnbuy.server.dto.PaymentResponseDto;
 import com.bidnbuy.server.dto.SaveAmountRequest;
 import com.bidnbuy.server.entity.OrderEntity;
 import com.bidnbuy.server.entity.PaymentEntity;
 import com.bidnbuy.server.exception.PaymentErrorResponse;
-import jakarta.servlet.http.HttpSession;
+import com.bidnbuy.server.service.OrderService;
+import com.bidnbuy.server.service.PaymentService;
+import com.sun.tools.jconsole.JConsoleContext;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.http.HttpResponse;
 
 @RequestMapping("/payments")
-@Controller
+@RestController
+@RequiredArgsConstructor
+@Slf4j
 public class PaymentController {
 
     private final TossPaymentClient tossPaymentClient;
+    private final PaymentService paymentService;
+    private final OrderService orderService;
 
     /**
-     * 결제 금액을 세션에 임시저장
-     * 결제 과정에서 악의적으로 결제 금액이 바뀌는 것을 확인하는 용도
+     * 결제 준비 (PENDING 저장)
      */
     @PostMapping("/saveAmount")
-    public ResponseEntity<?> saveAmount(HttpSession session, @RequestBody SaveAmountRequest saveAmountRequest) {
-        session.setAttribute(saveAmountRequest.getMerchantOrderId(), saveAmountRequest.getAmount());
-        return ResponseEntity.ok("Payment temp save successful");
+    public ResponseEntity<?> saveAmount(@RequestBody SaveAmountRequest request) {
+        try {
+            // OrderEntity 조회
+            OrderEntity order = orderService.findById(request.getOrderId());
+
+            // PaymentEntity 생성 (order FK 연결 필수)
+            PaymentEntity payment = paymentService.createPendingPayment(order, request);
+
+            log.info("✅ Payment pending saved: merchantOrderId={}, amount={}",
+                    payment.getMerchantOrderId(), payment.getTotalAmount());
+
+
+            return ResponseEntity.ok(payment);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(
+                    PaymentErrorResponse.builder()
+                            .code(400)
+                            .message("결제 준비 중 오류: " + e.getMessage())
+                            .build()
+            );
+        }
     }
 
     /**
-     * 결제 금액을 검증
+     * 결제 승인 처리
      */
-    @PostMapping("/verifyAmount")
-    public ResponseEntity<?> verifyAmount(HttpSession session, @RequestBody SaveAmountRequest saveAmountRequest) {
-
-        Object savedAmount = session.getAttribute(saveAmountRequest.getMerchantOrderId());
-
-        // 세션에 금액 정보가 없거나 타입이 예상과 다를 경우
-        if (savedAmount == null) {
-            return ResponseEntity.badRequest().body(
-                    PaymentErrorResponse.builder()
-                            .code(400)
-                            .message("결제 금액 정보가 유효하지 않습니다.")
-                            .build()
-            );
-        }
-
-        String amountInSession = String.valueOf(savedAmount);
-        String amountFromRequest = String.valueOf(saveAmountRequest.getAmount());
-
-        // 결제 금액 검증
-        if (!amountInSession.equals(amountFromRequest)) {
-            return ResponseEntity.badRequest().body(
-                    PaymentErrorResponse.builder()
-                            .code(400)
-                            .message("결제 금액이 일치하지 않습니다.")
-                            .build()
-            );
-        }
-
-        // 검증 완료 후 세션에서 제거
-        session.removeAttribute(saveAmountRequest.getMerchantOrderId());
-
-        return ResponseEntity.ok("Payment is valid");
-    }
-
     @PostMapping("/confirm")
-    public ResponseEntity<?> confirmPayment(@RequestBody ConfirmPaymentRequest request) {
+    public ResponseEntity<?> confirmPayment(@RequestBody PaymentRequestDTO request) {
         try {
-            // 1) 토스 승인 요청
+            // 1) Toss 승인 요청
             HttpResponse<String> response = tossPaymentClient.requestConfirm(request);
+
 
             if (response.statusCode() != 200) {
                 return ResponseEntity.status(response.statusCode()).body(response.body());
@@ -79,22 +71,24 @@ public class PaymentController {
 
             // 2) 응답 파싱
             PaymentResponseDto dto = tossPaymentClient.parseConfirmResponse(response.body());
-            String merchantOrderId = dto.getOrderId(); // = 토스 orderId
 
-            // 3) 내부 주문 찾기 (사전 매핑 테이블 또는 규칙 파싱)
-            // 예: orderService.findByMerchantOrderId(merchantOrderId)
-            OrderEntity order = orderService.findByMerchantOrderId(merchantOrderId)
-                    .orElseThrow(() -> new IllegalArgumentException("Order not found by merchantOrderId: " + merchantOrderId));
+            log.info("✅ Toss confirm orderId={}", dto.getOrderId());
 
-            // 4) DB 저장
-            PaymentEntity payment = paymentService.saveConfirmedPayment(order, dto);
+            // 3) DB 갱신
+            PaymentEntity payment = paymentService.saveConfirmedPayment(dto);
+
             return ResponseEntity.ok(payment);
 
         } catch (Exception e) {
-            // 네트워크/파싱 등 예외
-            return ResponseEntity.internalServerError().body("결제 승인 처리 중 오류 발생");
+            return ResponseEntity.internalServerError().body(
+                    PaymentErrorResponse.builder()
+                            .code(500)
+                            .message("결제 승인 처리 중 오류 발생: " + e.getMessage())
+                            .build()
+            );
         }
     }
+}
 
 
 
@@ -202,4 +196,4 @@ public class PaymentController {
 //        model.addAttribute("message", request.getParameter("message"));
 //        return "/fail";
 //    }
-}
+

@@ -7,7 +7,7 @@ public class paymentStatus {
     }
 
     public enum PaymentStatus {
-        SUCCESS, FAIL, CANCEL, REFUND
+        SUCCESS, FAIL, CANCEL, REFUND, PENDING
     }
 
 }
