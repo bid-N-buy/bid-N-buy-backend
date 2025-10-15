@@ -35,7 +35,6 @@ public class AuctionProductsService {
     private final ImageRepository imageRepository;
     private final WishlistRepository wishlistRepository;
     private final AuctionHistoryService auctionHistoryService;
-    // 💡 이미지 처리를 위해 ImageService 주입
     private final ImageService imageService;
 
     @Transactional
@@ -103,8 +102,13 @@ public class AuctionProductsService {
             int size,
             Integer minPrice,
             Integer maxPrice,
-            String sortBy
+            String sortBy,
+            Boolean includeEnded
     ) {
+
+        // 상태 리스트 결정
+        List<SellingStatus> statuses = getFilterStatuses(includeEnded);
+
         // 1. 상태 및 정렬 설정
         Sort sort = getSortCriteria(sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
@@ -113,6 +117,7 @@ public class AuctionProductsService {
         Page<AuctionProductsEntity> auctionPage = auctionProductsRepository.findByPriceRangeAndStatusAndDeletedAtIsNull(
                 minPrice,
                 maxPrice,
+                statuses,
                 pageable
         );
 
@@ -221,6 +226,7 @@ public class AuctionProductsService {
                 .build();
     }
 
+    // 삭제
     @Transactional
     public void deleteAuction(Long auctionId, Long userId) {
         AuctionProductsEntity products = auctionProductsRepository.findByAuctionIdAndDeletedAtIsNull(auctionId)
@@ -242,10 +248,11 @@ public class AuctionProductsService {
             int page,
             int size,
             String searchKeyword, // 검색 키워드만 사용
-            String sortBy
+            String sortBy,
+            Boolean includeEnded
     ) {
         // 1. 경매 상태 리스트 결정 (기본값: 진행 중 또는 시작 전)
-        List<SellingStatus> statuses = Arrays.asList(SellingStatus.PROGRESS, SellingStatus.SALE, SellingStatus.BEFORE);
+        List<SellingStatus> statuses = getFilterStatuses(includeEnded);
 
         // 2. 정렬 기준(Sort) 설정
         Sort sort = switch (sortBy != null ? sortBy.toLowerCase() : "latest") {

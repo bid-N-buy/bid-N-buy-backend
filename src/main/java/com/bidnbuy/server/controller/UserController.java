@@ -25,7 +25,7 @@ import org.springframework.web.servlet.view.RedirectView;
 @Slf4j
 @RestController
 @RequestMapping("/auth")
-public class UserController {
+public class   UserController {
 
     private final UserService userService;
     private final AuthService authService;
