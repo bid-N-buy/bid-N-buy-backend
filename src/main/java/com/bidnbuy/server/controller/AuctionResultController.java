@@ -1,7 +1,6 @@
 package com.bidnbuy.server.controller;
 
 import com.bidnbuy.server.dto.AuctionPurchaseHistoryDto;
-import com.bidnbuy.server.dto.AuctionResultDto;
 import com.bidnbuy.server.dto.AuctionSalesHistoryDto;
 import com.bidnbuy.server.dto.MyPageSummaryDto;
 import com.bidnbuy.server.service.AuctionResultService;
@@ -22,17 +21,8 @@ public class AuctionResultController {
     private final AuctionResultService auctionResultService;
 
     @GetMapping
-    public ResponseEntity<?>getList(@AuthenticationPrincipal Long userId) {
-        // 구매 내역 3개
-        List<AuctionPurchaseHistoryDto> recentPurchases = auctionResultService.getRecentPurchaseHistory(userId);
-        // 판매 내역 3개
-        List<AuctionSalesHistoryDto> recentSales  = auctionResultService.getRecentSalesHistory(userId);
-
-        MyPageSummaryDto response = MyPageSummaryDto.builder()
-                .recentPurchase(recentPurchases)
-                .recentSales(recentSales)
-                .build();
-
+    public ResponseEntity<?> getMyPageSummaryDto(@AuthenticationPrincipal Long userId) {
+        MyPageSummaryDto response = auctionResultService.getMyPageSummaryDto(userId);
         return ResponseEntity.ok().body(response);
     }
 
@@ -42,10 +32,6 @@ public class AuctionResultController {
             @AuthenticationPrincipal Long userId) { 
 
         List<AuctionPurchaseHistoryDto> history = auctionResultService.getPurchaseHistory(userId);
-
-        if (history.isEmpty()) {
-            return ResponseEntity.noContent().build(); // 내용이 없을 경우 204 No Content 반환
-        }
 
         return ResponseEntity.ok(history);
     }
@@ -57,10 +43,6 @@ public class AuctionResultController {
             @AuthenticationPrincipal Long userId) {
 
         List<AuctionSalesHistoryDto> history = auctionResultService.getSalesHistory(userId);
-
-        if (history.isEmpty()) {
-            return ResponseEntity.noContent().build(); // 내용이 없을 경우 204 No Content 반환
-        }
 
         return ResponseEntity.ok(history);
     }

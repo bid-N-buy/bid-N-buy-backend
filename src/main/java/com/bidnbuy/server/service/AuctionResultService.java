@@ -4,8 +4,12 @@ import com.bidnbuy.server.dto.AuctionPurchaseHistoryDto;
 import com.bidnbuy.server.dto.AuctionSalesHistoryDto;
 import com.bidnbuy.server.dto.MyPageSummaryDto;
 import com.bidnbuy.server.entity.AuctionResultEntity;
+import com.bidnbuy.server.entity.UserEntity;
 import com.bidnbuy.server.enums.ResultStatus;
 import com.bidnbuy.server.repository.AuctionResultRepository;
+import com.bidnbuy.server.repository.ImageRepository;
+import com.bidnbuy.server.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,20 +21,44 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AuctionResultService {
     private final AuctionResultRepository auctionResultRepository;
+    private final UserRepository userRepository;
+    private final ImageRepository imageRepository;
 
-    // 구매 내역 요약 (최근 3개)
+    // 마이페이지 기본
     @Transactional(readOnly = true)
-    public List<AuctionPurchaseHistoryDto> getRecentPurchaseHistory(Long userId) {
+    public MyPageSummaryDto getMyPageSummaryDto(Long userId) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+
+        // 마이페이지 최근
+        List<AuctionPurchaseHistoryDto> recentPurchases = getRecentPurchases(userId); // 구매
+        List<AuctionSalesHistoryDto> recentSales = getRecentSales(userId); // 판매
+        
+        // TODO 아직 리뷰 받는 게 없어서 온도 하드코딩 추후에 완료되면 적용
+        Double temperature = 36.5;
+
+        return MyPageSummaryDto.builder().nickname(user.getNickname())
+                .temperature(temperature)
+                .profileImageUrl(user.getProfileImageUrl())
+                .recentPurchases(recentPurchases)
+                .recentSales(recentSales)
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    private List<AuctionPurchaseHistoryDto> getRecentPurchases(Long userId) {
+
         List<AuctionPurchaseHistoryDto> history = getPurchaseHistory(userId);
 
-        if(history.size() > 3){
+        if (history.size() > 3) {
             return history.subList(0, 3);
         }
         return history;
     }
 
     @Transactional(readOnly = true)
-    public List<AuctionSalesHistoryDto> getRecentSalesHistory(Long userId) {
+    private List<AuctionSalesHistoryDto> getRecentSales(Long userId) {
+
         List<AuctionSalesHistoryDto> history = getSalesHistory(userId);
 
         if (history.size() > 3) {
@@ -44,7 +72,7 @@ public class AuctionResultService {
     public List<AuctionPurchaseHistoryDto> getPurchaseHistory(Long userId) {
         List<AuctionResultEntity> results = auctionResultRepository.findByWinner_UserId_Optimized(userId);
 
-        return  results.stream()
+        return results.stream()
                 .map(this::toPurchaseDto)
                 .collect(Collectors.toList());
     }
@@ -63,7 +91,9 @@ public class AuctionResultService {
     private AuctionPurchaseHistoryDto toPurchaseDto(AuctionResultEntity result) {
         String status = determineStatusText(result);
 
-        String imageUrl = "이미지";
+        Long auctionId = result.getAuction().getAuctionId();
+        String imageUrl = imageRepository.findFirstImageUrlByAuctionId(auctionId)
+                .orElse("/images/default_product.png");
 
         return AuctionPurchaseHistoryDto.builder()
                 .auctionId(result.getAuction().getAuctionId())
@@ -78,7 +108,10 @@ public class AuctionResultService {
     // 판매 내역
     private AuctionSalesHistoryDto toSalesDto(AuctionResultEntity result) {
         String statusText = determineStatusText(result);
-        String imageUrl = "이미지";
+
+        Long auctionId = result.getAuction().getAuctionId();
+        String imageUrl = imageRepository.findFirstImageUrlByAuctionId(auctionId)
+                .orElse("/images/default_product.png");
 
         String winnerNickname = null;
         if (result.getWinner() != null) {
@@ -101,7 +134,8 @@ public class AuctionResultService {
     // 구매내역에 페이별로 조회
     private String determineStatusText(AuctionResultEntity result) {
         ResultStatus status = result.getResultStatus();
-
+        
+        // 이건 의논해서 물어봐야함
         if (status == ResultStatus.FAILURE) {
             return "유찰 (종료)";
         } else if (status == ResultStatus.CANCELED) {
@@ -113,6 +147,6 @@ public class AuctionResultService {
             return "결제 대기 중 (진행 중)";
         }
 
-        return  "상태 정보 없음";
+        return "상태 정보 없음";
     }
 }

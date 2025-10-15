@@ -8,6 +8,10 @@ import java.util.List;
 @Getter
 @Builder
 public class MyPageSummaryDto {
-    private List<AuctionPurchaseHistoryDto> recentPurchase;
+    private String nickname;
+    private String email;
+    private Double temperature;
+    private String profileImageUrl;
+    private List<AuctionPurchaseHistoryDto> recentPurchases;
     private List<AuctionSalesHistoryDto> recentSales;
 }
