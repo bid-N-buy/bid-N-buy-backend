@@ -33,6 +33,10 @@ public class AuctionProductsController {
             throw new IllegalArgumentException("경매 상품 이미지는 최소 1개 이상 필요합니다.");
         }
 
+        if (imageFiles.size() > 10) {
+            throw new IllegalArgumentException("경매 상품 이미지는 최대 10개까지 입니다.");
+        }
+
         AuctionProductsEntity newProduct = auctionProductsService.create(userId, dto, imageFiles);
 
         // 2. 응답 DTO 생성 및 HTTP 201 Created 반환
@@ -53,7 +57,8 @@ public class AuctionProductsController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) Integer minPrice,
             @RequestParam(required = false) Integer maxPrice,
-             @RequestParam(defaultValue = "latest") String sortBy
+             @RequestParam(defaultValue = "latest") String sortBy,
+            @RequestParam(defaultValue = "false") Boolean includeEnded
     ) {
         // 확장된 서비스 메서드 호출
         PagingResponseDto<AuctionListResponseDto> list = auctionProductsService.getAllAuctions(
@@ -61,7 +66,8 @@ public class AuctionProductsController {
                 size,
                 minPrice,
                 maxPrice,
-                sortBy
+                sortBy,
+                includeEnded
         );
         return ResponseEntity.ok(list);
     }
@@ -99,13 +105,15 @@ public class AuctionProductsController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String searchKeyword,
-            @RequestParam(defaultValue = "latest") String sortBy
+            @RequestParam(defaultValue = "latest") String sortBy,
+            @RequestParam(defaultValue = "false") Boolean includeEnded
     ) {
         PagingResponseDto<AuctionListResponseDto> list = auctionProductsService.searchAuctions(
                 page,
                 size,
                 searchKeyword,
-                sortBy
+                sortBy,
+                includeEnded
         );
         return ResponseEntity.ok(list);
     }

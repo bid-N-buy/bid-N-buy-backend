@@ -21,7 +21,13 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoomEntity, Long> 
             AuctionProductsEntity auctionId
     );
 
-    List<ChatRoomEntity> findByBuyerIdOrSellerIdOrderByLastMessageTimeDesc(UserEntity buyerId, UserEntity sellerId);
+    @Query("SELECT cr FROM ChatRoomEntity cr " +
+            "WHERE (cr.buyerId = :user OR cr.sellerId = :user) " +
+            "AND cr.deletedAt IS NULL " +
+            "ORDER BY cr.lastMessageTime DESC")
+    List<ChatRoomEntity> findActiveRoomsByUserId(@Param("user") UserEntity user);
+
+    List<ChatRoomEntity> findByBuyerIdOrSellerIdAndDeletedAtIsNullOrderByLastMessageTime(UserEntity buyer, UserEntity seller);
 
 //    @Modifying
 //    @Query("update ChatRoomEntity cr set cr.deletedAt = :deletedAt where cr.chatroomId= :chatroomId")

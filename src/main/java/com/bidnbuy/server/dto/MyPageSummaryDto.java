@@ -12,8 +12,6 @@ public class MyPageSummaryDto {
     private String email;
     private Double temperature;
     private String profileImageUrl;
-
     private List<AuctionPurchaseHistoryDto> recentPurchases;
     private List<AuctionSalesHistoryDto> recentSales;
-
 }

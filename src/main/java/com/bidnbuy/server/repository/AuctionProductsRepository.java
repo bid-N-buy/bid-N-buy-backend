@@ -32,11 +32,13 @@ public interface AuctionProductsRepository extends JpaRepository<AuctionProducts
             "LEFT JOIN FETCH p.user u " +
             "LEFT JOIN FETCH p.category c " +
             "WHERE p.deletedAt IS NULL " + // 삭제되지 않은 상품만
+            "AND p.sellingStatus IN :statuses " +
             "AND (:minPrice IS NULL OR p.currentPrice >= :minPrice) " + // 가격 하한 필터
             "AND (:maxPrice IS NULL OR p.currentPrice <= :maxPrice)") // 가격 상한 필터
     Page<AuctionProductsEntity> findByPriceRangeAndStatusAndDeletedAtIsNull(
             @Param("minPrice") Integer minPrice,
             @Param("maxPrice") Integer maxPrice,
+            @Param("statuses") List<SellingStatus> statuses,
             Pageable pageable
     );
 
@@ -51,6 +53,7 @@ public interface AuctionProductsRepository extends JpaRepository<AuctionProducts
     @Query("SELECT p FROM AuctionProductsEntity p " +
             "JOIN FETCH p.user u " +
             "JOIN FETCH p.category c " +
+            "LEFT JOIN FETCH p.images i " +
             "WHERE p.auctionId = :auctionId")
     Optional<AuctionProductsEntity> findByIdWithDetails(Long auctionId);
 
@@ -61,8 +64,8 @@ public interface AuctionProductsRepository extends JpaRepository<AuctionProducts
     @Query("SELECT p FROM AuctionProductsEntity p " +
             "JOIN FETCH p.user u " +
             "JOIN FETCH p.category c " +
-            "WHERE p.sellingStatus IN :statuses " +
-            // 🚨 수정: description 검색 조건 제거, title에만 LIKE 조건 적용
+            "WHERE p.deletedAt IS NULL "  +
+            "AND p.sellingStatus IN :statuses " +
             "AND (:searchKeyword IS NULL OR p.title LIKE %:searchKeyword%)"
     )
 
