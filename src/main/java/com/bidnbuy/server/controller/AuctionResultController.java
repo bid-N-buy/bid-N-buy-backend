@@ -2,6 +2,7 @@ package com.bidnbuy.server.controller;
 
 import com.bidnbuy.server.dto.AuctionPurchaseHistoryDto;
 import com.bidnbuy.server.dto.AuctionSalesHistoryDto;
+import com.bidnbuy.server.dto.MyPageSummaryDto;
 import com.bidnbuy.server.service.AuctionResultService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,16 +20,18 @@ public class AuctionResultController {
 
     private final AuctionResultService auctionResultService;
 
+    @GetMapping
+    public ResponseEntity<?> getMyPageSummaryDto(@AuthenticationPrincipal Long userId) {
+        MyPageSummaryDto response = auctionResultService.getMyPageSummaryDto(userId);
+        return ResponseEntity.ok().body(response);
+    }
+
     // 마이페이지 - 구매 내역 (낙찰 내역) 조회
     @GetMapping("/purchase")
     public ResponseEntity<?> getPurchaseHistory(
             @AuthenticationPrincipal Long userId) { 
 
         List<AuctionPurchaseHistoryDto> history = auctionResultService.getPurchaseHistory(userId);
-
-        if (history.isEmpty()) {
-            return ResponseEntity.noContent().build(); // 내용이 없을 경우 204 No Content 반환
-        }
 
         return ResponseEntity.ok(history);
     }
@@ -40,10 +43,6 @@ public class AuctionResultController {
             @AuthenticationPrincipal Long userId) {
 
         List<AuctionSalesHistoryDto> history = auctionResultService.getSalesHistory(userId);
-
-        if (history.isEmpty()) {
-            return ResponseEntity.noContent().build(); // 내용이 없을 경우 204 No Content 반환
-        }
 
         return ResponseEntity.ok(history);
     }
