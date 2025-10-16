@@ -1,10 +1,7 @@
 package com.bidnbuy.server.controller;
 
 import com.bidnbuy.server.config.TossPaymentClient;
-import com.bidnbuy.server.dto.PaymentPendingResponseDto;
-import com.bidnbuy.server.dto.PaymentRequestDTO;
-import com.bidnbuy.server.dto.PaymentResponseDto;
-import com.bidnbuy.server.dto.SaveAmountRequest;
+import com.bidnbuy.server.dto.*;
 import com.bidnbuy.server.entity.OrderEntity;
 import com.bidnbuy.server.entity.PaymentEntity;
 import com.bidnbuy.server.exception.PaymentErrorResponse;
@@ -91,6 +88,15 @@ public class PaymentController {
             );
         }
     }
+
+    // ✅ 사용자 취소 요청 (전액 취소)
+    @PostMapping("/cancel")
+    public ResponseEntity<PaymentCancelResponseDto> cancelPayment(@RequestBody PaymentCancelRequestDto requestDto) {
+        PaymentCancelResponseDto result = paymentService.cancelPayment(requestDto);
+        return ResponseEntity.ok(result);
+    }
+
+
 }
 
 

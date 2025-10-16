@@ -1,17 +1,20 @@
 package com.bidnbuy.server.service;
 
-import com.bidnbuy.server.dto.PaymentResponseDto;
-import com.bidnbuy.server.dto.SaveAmountRequest;
+import com.bidnbuy.server.config.TossPaymentClient;
+import com.bidnbuy.server.dto.*;
 import com.bidnbuy.server.entity.OrderEntity;
+import com.bidnbuy.server.entity.PaymentCancelEntity;
 import com.bidnbuy.server.entity.PaymentEntity;
 import com.bidnbuy.server.enums.paymentStatus;
 import com.bidnbuy.server.repository.OrderRepository;
+import com.bidnbuy.server.repository.PaymentCancelRepository;
 import com.bidnbuy.server.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.Optional;
@@ -22,6 +25,52 @@ import java.util.Optional;
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
+    private final PaymentCancelRepository paymentCancelRepository;
+    private final TossPaymentClient tossPaymentClient;
+
+    // 취소
+    @Transactional
+    public PaymentCancelResponseDto cancelPayment(PaymentCancelRequestDto requestDto) {
+        PaymentEntity payment = paymentRepository.findById(requestDto.getPaymentId())
+                .orElseThrow(() -> new IllegalArgumentException("결제 내역을 찾을 수 없습니다."));
+
+        // 이미 취소된 경우
+        if (payment.getTossPaymentStatus() == paymentStatus.PaymentStatus.CANCEL) {
+            throw new IllegalStateException("이미 취소된 결제입니다.");
+        }
+
+        try {
+            TossCancelResponseDto tossResponse = tossPaymentClient.cancelPayment(
+                    payment.getTossPaymentKey(),
+                    requestDto.getCancelReason()
+            );
+
+            // DB에 취소 기록 저장
+            PaymentCancelEntity cancel = new PaymentCancelEntity();
+            cancel.setPayment(payment);
+            cancel.setCancelReason(tossResponse.getCancelReason());
+            cancel.setCancelAmount(tossResponse.getCancelAmount());
+            cancel.setCancelRequestedAt(LocalDateTime.now());
+            cancel.setCancelledAt(tossResponse.getCancelledAt());
+            paymentCancelRepository.save(cancel);
+
+            payment.setTossPaymentStatus(paymentStatus.PaymentStatus.CANCEL);
+            paymentRepository.save(payment);
+
+            return PaymentCancelResponseDto.builder()
+                    .paymentId(payment.getPaymentId())
+                    .cancelAmount(cancel.getCancelAmount())
+                    .status(payment.getTossPaymentStatus().name())
+                    .cancelledAt(cancel.getCancelledAt())
+                    .build();
+
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException("Toss 취소 요청 중 오류 발생", e);
+        }
+    }
+
+
+
 
     /**
      * merchantOrderId로 Payment 조회

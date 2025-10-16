@@ -2,8 +2,10 @@ package com.bidnbuy.server.config;
 
 import com.bidnbuy.server.dto.PaymentRequestDTO;
 import com.bidnbuy.server.dto.PaymentResponseDto;
+import com.bidnbuy.server.dto.TossCancelResponseDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 @Component
+@RequiredArgsConstructor
 @Slf4j
 public class TossPaymentClient {
 
@@ -48,8 +51,20 @@ public class TossPaymentClient {
     }
 
     /**
-     * 결제 취소 요청
+     * 결제 취소 요청(전액 취소)
      */
+    public TossCancelResponseDto cancelPayment(String paymentKey, String cancelReason)
+            throws IOException, InterruptedException {
+
+        HttpResponse<String> response = requestPaymentCancel(paymentKey, cancelReason);
+
+        if (response.statusCode() != 200) {
+            throw new RuntimeException("Toss 취소 요청 실패: " + response.body());
+        }
+
+        return objectMapper.readValue(response.body(), TossCancelResponseDto.class);
+    }
+
     public HttpResponse<String> requestPaymentCancel(String paymentKey, String cancelReason) throws IOException, InterruptedException {
         ObjectNode node = objectMapper.createObjectNode();
         node.put("cancelReason", cancelReason);
