@@ -427,16 +427,16 @@ public class AuctionProductsService {
             case PROGRESS -> {
                 LocalDateTime now = LocalDateTime.now();
                 if (now.isBefore(product.getStartTime())) {
-                    yield "시작 전"; // 시작 전
+                    yield "시작전"; // 시작 전
                 } else if (now.isAfter(product.getEndTime())) {
                     yield "종료";
                 } else {
-                    yield "진행 중"; // 판매 중
+                    yield "진행중"; // 판매 중
                 }
             }
-            case SALE -> "진행 중";
+            case SALE -> "진행중";
             case BEFORE -> "시작전";
-            case COMPLETED -> "거래 완료";
+            case COMPLETED -> "완료"; // 거래 완료
             case FINISH -> "종료";
         };
     }
