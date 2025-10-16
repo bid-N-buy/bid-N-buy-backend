@@ -436,7 +436,7 @@ public class AuctionProductsService {
             }
             case SALE -> "진행중";
             case BEFORE -> "시작전";
-            case COMPLETED -> "거래완료";
+            case COMPLETED -> "거래완료"; // 거래완료
             case FINISH -> "종료";
         };
     }
