@@ -1,17 +1,19 @@
 package com.bidnbuy.server.dto;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class PaymentCancelResponseDto {
-    private Long paymentId;
+    private String paymentKey;
+    private String transactionKey;
+    private String cancelReason;
     private Integer cancelAmount;
-    private String status;       // CANCELLED
-    private LocalDateTime cancelledAt;
+    private String cancelStatus;   // DONE
+    private String receiptKey;
+    private LocalDateTime canceledAt;
 }

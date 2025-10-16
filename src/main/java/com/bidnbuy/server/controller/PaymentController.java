@@ -89,7 +89,7 @@ public class PaymentController {
         }
     }
 
-    // ✅ 사용자 취소 요청 (전액 취소)
+    //  사용자 취소 요청 (전액 취소)
     @PostMapping("/cancel")
     public ResponseEntity<PaymentCancelResponseDto> cancelPayment(@RequestBody PaymentCancelRequestDto requestDto) {
         PaymentCancelResponseDto result = paymentService.cancelPayment(requestDto);
@@ -98,8 +98,6 @@ public class PaymentController {
 
 
 }
-
-
 
 
 //    private final Logger logger = LoggerFactory.getLogger(this.getClass());

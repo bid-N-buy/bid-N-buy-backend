@@ -23,8 +23,23 @@ public class PaymentCancelEntity {
     private String cancelReason;
     private Integer cancelAmount;
 
-    @Column(nullable = false)
-    private LocalDateTime cancelRequestedAt;
+    // Toss 트랜잭션 키 (취소 고유 ID)
+    @Column(nullable = false, length = 100)
+    private String transactionKey;
 
-    private LocalDateTime cancelledAt;
+    // Toss 취소 상태 (예: DONE)
+    @Column(nullable = false, length = 50)
+    private String cancelStatus;
+
+    // 취소 영수증 키
+    @Column(length = 255)
+    private String receiptKey;
+
+    // Toss 응답의 canceledAt
+    @Column(nullable = false)
+    private LocalDateTime canceledAt;
+
+    // 로그 생성 시간 (DB 관리용)
+    @Column(nullable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
 }

@@ -53,16 +53,25 @@ public class TossPaymentClient {
     /**
      * 결제 취소 요청(전액 취소)
      */
-    public TossCancelResponseDto cancelPayment(String paymentKey, String cancelReason)
+    public HttpResponse<String> cancelPayment(String paymentKey, String cancelReason, Integer cancelAmount)
             throws IOException, InterruptedException {
 
-        HttpResponse<String> response = requestPaymentCancel(paymentKey, cancelReason);
-
-        if (response.statusCode() != 200) {
-            throw new RuntimeException("Toss 취소 요청 실패: " + response.body());
+        ObjectNode node = objectMapper.createObjectNode();
+        node.put("cancelReason", cancelReason);
+        if (cancelAmount != null) {
+            node.put("cancelAmount", cancelAmount);
         }
 
-        return objectMapper.readValue(response.body(), TossCancelResponseDto.class);
+        String requestBody = objectMapper.writeValueAsString(node);
+
+        HttpRequest httpReq = HttpRequest.newBuilder()
+                .uri(URI.create("https://api.tosspayments.com/v1/payments/" + paymentKey + "/cancel"))
+                .header("Authorization", buildBasicAuthHeader(secretKey))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
+                .build();
+
+        return HttpClient.newHttpClient().send(httpReq, HttpResponse.BodyHandlers.ofString());
     }
 
     public HttpResponse<String> requestPaymentCancel(String paymentKey, String cancelReason) throws IOException, InterruptedException {

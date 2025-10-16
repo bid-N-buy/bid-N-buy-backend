@@ -47,6 +47,6 @@ public class PaymentEntity {
     private LocalDateTime approvedAt;
 
     // ✅ 결제 취소 내역
-    @OneToMany(mappedBy = "payment", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "payment", cascade = CascadeType.ALL)
     private List<PaymentCancelEntity> cancels = new ArrayList<>();
 }
