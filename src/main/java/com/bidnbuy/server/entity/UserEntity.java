@@ -30,7 +30,7 @@ public class UserEntity {
 
     @ManyToOne
     @JoinColumn(name = "admin_id", nullable = true) //나중에 false로 바꾸기
-    private AdminEntity adminId;
+    private AdminEntity admin;
 
     @ManyToOne
     @JoinColumn(name = "address_id", nullable = true)
