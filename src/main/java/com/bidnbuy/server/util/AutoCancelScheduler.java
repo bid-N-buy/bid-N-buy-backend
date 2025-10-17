@@ -1,4 +1,4 @@
-package com.bidnbuy.server.scheduler;
+package com.bidnbuy.server.util;
 
 import com.bidnbuy.server.service.OrderService;
 import lombok.RequiredArgsConstructor;
