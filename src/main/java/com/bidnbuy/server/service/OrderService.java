@@ -22,6 +22,38 @@ public class OrderService {
     private final UserRepository userRepository;
     private final PaymentService paymentService;
 
+    // 볍점 부여
+    @Transactional
+    public void rateOrder(Long orderId, Long buyerId, int rating) {
+        OrderEntity order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("주문을 찾을 수 없습니다."));
+
+        // 1) 구매자 본인 거래인지 확인
+        if (order.getBuyer().getUserId() != buyerId) {
+            throw new IllegalStateException("본인의 거래만 평가할 수 있습니다.");
+        }
+
+        // 2) 주문 상태 확인 (완료 상태만 가능)
+        if (!"COMPLETED".equalsIgnoreCase(order.getOrderStatus())) {
+            throw new IllegalStateException("거래 완료 상태에서만 별점을 줄 수 있습니다.");
+        }
+
+        // 3) 이미 별점 등록된 경우 방지
+        if (order.getRating() > 0) {
+            throw new IllegalStateException("이미 별점이 등록된 거래입니다.");
+        }
+
+        // 4) 별점 유효성 체크
+        if (rating < 1 || rating > 10) {
+            throw new IllegalArgumentException("별점은 1~5 사이여야 합니다.");
+        }
+
+        // 저장
+        order.setRating(rating);
+        orderRepository.save(order);
+    }
+    
+
     //주문 상태 업데이트
     @Transactional
     public OrderUpdateResponseDto updateOrderStatus(Long orderId, Long userId, OrderUpdateRequestDto dto) {

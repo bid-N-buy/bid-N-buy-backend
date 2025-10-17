@@ -1,13 +1,15 @@
 package com.bidnbuy.server.controller;
 
-import com.bidnbuy.server.dto.OrderRequestDto;
-import com.bidnbuy.server.dto.OrderResponseDto;
-import com.bidnbuy.server.dto.OrderUpdateRequestDto;
-import com.bidnbuy.server.dto.OrderUpdateResponseDto;
+import com.bidnbuy.server.dto.*;
+import com.bidnbuy.server.entity.UserEntity;
 import com.bidnbuy.server.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.User;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,12 +22,30 @@ public class OrderController {
 
     private final OrderService orderService;
 
+    @PostMapping("/{orderId}/rating")
+    public ResponseEntity<String> rateOrder(
+            @PathVariable Long orderId,
+            @RequestBody RatingRequest request
+    ) {
+
+        Long buyerId = 2L;
+        // TODO : 토큰방식으로 변경
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        User user = (User) authentication.getPrincipal();
+//        long buyerId = Long.parseLong(user.getUsername());
+
+        orderService.rateOrder(orderId, buyerId, request.getRating());
+        return ResponseEntity.ok("별점이 등록되었습니다.");
+    }
+
+    // 주문 생성
     @PostMapping
     public ResponseEntity<OrderResponseDto> createOrder(@RequestBody OrderRequestDto dto) {
         OrderResponseDto response = orderService.createOrder(dto);
         return ResponseEntity.ok(response);
     }
 
+    // 주문 전체 조회
     @GetMapping
     public ResponseEntity<List<OrderResponseDto>> getMyOrders(
             @RequestParam String type,
