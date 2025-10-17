@@ -37,6 +37,17 @@ public class ChatMessageEntity {
     @Column(name="message")
     private String message;
 
+    //request 요청을 위한 컬럼 추가
+    @Column(name="auction_id")
+    private Long auctionId;
+
+    @Column(name="buyer_id")
+    private Long buyerId;
+
+    @Column(name="current_price")
+    private Long currentPrice;
+    //
+
     @Enumerated(EnumType.STRING)
     @Column(name="message_type", nullable = false)
     private MessageType messageType = MessageType.CHAT;
