@@ -21,7 +21,9 @@ public interface ImageRepository extends JpaRepository<ImageEntity, Long> {
 
     @Query("SELECT i.imageUrl FROM ImageEntity i " +
             "WHERE i.auctionProduct.auctionId = :auctionId " +
-            "ORDER BY i.imageType DESC, i.id ASC " +
+            "ORDER BY " +
+            "    CASE WHEN i.imageType = 'MAIN' THEN 0 ELSE 1 END, " + // 1. MAIN 타입에 0점, PRODUCT 타입에 1점 부여 (0이 우선순위 높음)
+            "    i.id ASC " + // 2. 그 다음 등록 순서대로 정렬
             "LIMIT 1")
     Optional<String> findFirstImageUrlByAuctionId(Long auctionId);
 
