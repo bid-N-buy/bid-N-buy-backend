@@ -2,6 +2,7 @@ package com.bidnbuy.server.service;
 
 import com.bidnbuy.server.dto.ChatMessageDto;
 import com.bidnbuy.server.dto.ChatMessageRequestDto;
+import com.bidnbuy.server.dto.ChatReadStatusUpdateDto;
 import com.bidnbuy.server.entity.ChatMessageEntity;
 import com.bidnbuy.server.entity.ChatRoomEntity;
 import com.bidnbuy.server.entity.UserEntity;
@@ -12,6 +13,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.target.LazyInitTargetSource;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,7 @@ public class ChatMessageService {
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     //db저장 후 dto반환
     @Transactional
@@ -118,11 +121,22 @@ public class ChatMessageService {
         markMessagesAsRead(chatRoom, reader);
     }
 
-    //메세지 읽음 처리하기
+    //메세지 읽음 처리하기(실시간 반영)
     @Transactional
     public void markMessagesAsRead(ChatRoomEntity chatRoom, UserEntity reader){
         try{
             int updatedCount = chatMessageRepository.markMessagesAsRead(chatRoom, reader);
+            if(updatedCount > 0){
+                String destination = "/chat/readstatus/"+chatRoom.getChatroomId();
+                ChatReadStatusUpdateDto updateDto = new ChatReadStatusUpdateDto(
+                        chatRoom.getChatroomId(),
+                        reader.getUserId(),
+                        updatedCount
+                );
+
+                messagingTemplate.convertAndSend(destination, updateDto);
+                log.info("웹소켓 활용- 채팅방 {}의 읽음 상태 업데이트", chatRoom.getChatroomId());
+            }
             log.info("채팅방{}에서 사용자 {}가 {}개의 메시지를 읽음", chatRoom.getChatroomId(), reader.getUserId(), updatedCount);
         }catch (Exception e){
             log.error("메세지 읽음 처리 중 오류 발생", e);
