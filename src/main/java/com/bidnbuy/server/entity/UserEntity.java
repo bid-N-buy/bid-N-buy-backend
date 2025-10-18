@@ -96,6 +96,10 @@ public class UserEntity {
     @Builder.Default
     private int penaltyPoints = 0;
 
+    // 유저 전화번호
+    @Column(name = "user_tel", nullable = true)
+    private String tel;
+
     // 정지 해제 예정일
     @Column(name = "suspended_until")
     private LocalDateTime suspendedUntil;

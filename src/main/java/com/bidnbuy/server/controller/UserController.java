@@ -255,11 +255,24 @@ public class   UserController {
     // 프로필 이미지 업로드
     @PutMapping("/{userId}/profile")
     public ResponseEntity<?> uploadProfileImage(@AuthenticationPrincipal Long userId,
-              @RequestPart("image") MultipartFile imageFile ) {
+              @RequestPart("images") MultipartFile imageFile ) {
         String newImageUrl = imageService.updateProfileImage(userId, imageFile);
 
         UserImageDto response = UserImageDto.builder()
                 .imageUrl(newImageUrl)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    // 프로필 이미지 조회
+    @GetMapping("/{userId}/profile")
+    public ResponseEntity<?> getProfileImage(@AuthenticationPrincipal Long userId) {
+
+        String profileImage = userService.getProfileImageUrl(userId);
+
+        UserImageDto response = UserImageDto.builder()
+                .imageUrl(profileImage)
                 .build();
 
         return ResponseEntity.ok(response);
