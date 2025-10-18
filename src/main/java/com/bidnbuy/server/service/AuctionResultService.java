@@ -40,6 +40,7 @@ public class AuctionResultService {
 
         return MyPageSummaryDto.builder().nickname(user.getNickname())
                 .temperature(temperature)
+                .email(user.getEmail())
                 .profileImageUrl(user.getProfileImageUrl())
                 .recentPurchases(recentPurchases)
                 .recentSales(recentSales)
