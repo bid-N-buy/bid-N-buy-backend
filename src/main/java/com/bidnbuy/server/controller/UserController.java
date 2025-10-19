@@ -259,7 +259,7 @@ public class   UserController {
         String newImageUrl = imageService.updateProfileImage(userId, imageFile);
 
         UserImageDto response = UserImageDto.builder()
-                .imageUrl(newImageUrl)
+                .profileImageUrl(newImageUrl)
                 .build();
 
         return ResponseEntity.ok(response);
@@ -272,10 +272,34 @@ public class   UserController {
         String profileImage = userService.getProfileImageUrl(userId);
 
         UserImageDto response = UserImageDto.builder()
-                .imageUrl(profileImage)
+                .profileImageUrl(profileImage)
                 .build();
 
         return ResponseEntity.ok(response);
+    }
+
+    // 닉네임 업데이트
+    @GetMapping("/{userId}/nickname")
+    public ResponseEntity<?> updateNickName(@AuthenticationPrincipal Long userId) {
+
+       String nickname = userService.getNickName(userId);
+
+       UserNickNameDto response = UserNickNameDto.builder()
+               .nickname(nickname)
+               .build();
+       return  ResponseEntity.ok(response);
+    }
+
+    // 닉네임 조회
+    @PutMapping("/{userId}/nickname")
+    public ResponseEntity<?> updateNickname(@AuthenticationPrincipal Long userId, @RequestBody UserNickNameDto dto) {
+        String nickname = userService.updateNickName(userId, dto.getNickname());
+
+        UserNickNameDto response = UserNickNameDto.builder()
+                .nickname(nickname)
+                .build();
+
+        return  ResponseEntity.ok(response);
     }
 
     //로그아웃

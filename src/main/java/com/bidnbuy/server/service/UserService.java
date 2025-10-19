@@ -66,8 +66,8 @@ public class UserService {
 //            throw new RuntimeException("email already exists");
 //        }
 
-        if(!emailVerificationService.isEmailVerified(email)){
-            log.warn("email not verified for signup:{}:", email );
+        if (!emailVerificationService.isEmailVerified(email)) {
+            log.warn("email not verified for signup:{}:", email);
             throw new CustomAuthenticationException("이메일 인증부터 해야 함");
         }
         //삭제된 계정 포함 이메일 조회
@@ -285,5 +285,26 @@ public class UserService {
         }
 
         return savedImageUrl;
+    }
+
+    // 유저 닉네임 조회
+    public String getNickName(Long userId) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 사용자 존재하지 않습니다."));
+
+        return user.getNickname();
+    }
+
+    // 유저 닉네임 업데이트
+    public String updateNickName(Long userId, String newNickName) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 사용자 존재하지 않습니다."));
+
+        user.setNickname(newNickName);
+
+        userRepository.save(user);
+
+        // 5. 업데이트된 닉네임을 반환합니다.
+        return user.getNickname();
     }
 }
