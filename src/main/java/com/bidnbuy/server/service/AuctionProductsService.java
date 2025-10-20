@@ -256,7 +256,8 @@ public class AuctionProductsService {
         }
 
         products.setDeletedAt(LocalDateTime.now());
-        // 추가 개선 사항: 파일 저장소가 로컬/S3인 경우, 여기서 ImageService를 통해 실제 파일 삭제 로직을 호출해야 함.
+
+        auctionProductsRepository.save(products);
     }
 
     // 관리자용 삭제
