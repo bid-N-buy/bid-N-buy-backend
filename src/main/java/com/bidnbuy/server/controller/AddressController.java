@@ -27,6 +27,14 @@ public class AddressController {
         return ResponseEntity.ok().body(response);
     }
 
+    @GetMapping("/{addressId}")
+    public ResponseEntity<?> getAddressById(@AuthenticationPrincipal Long userId, @PathVariable Long addressId) {
+
+        AddressResponseDto response = addressService.getAddressById(userId, addressId);
+
+        return ResponseEntity.ok().body(response);
+    }
+
     @PostMapping
     public ResponseEntity<?> createAddress(@AuthenticationPrincipal Long userId,
                                            @RequestBody @Valid AddressRequestDto dto) {
@@ -49,7 +57,7 @@ public class AddressController {
     @DeleteMapping("/{addressId}")
     public ResponseEntity<?> deleteAddress(@AuthenticationPrincipal Long userId, @PathVariable Long addressId) {
 
-       addressService.deleteAddress(userId, addressId);
+        addressService.deleteAddress(userId, addressId);
 
         return ResponseEntity.noContent().build();
     }

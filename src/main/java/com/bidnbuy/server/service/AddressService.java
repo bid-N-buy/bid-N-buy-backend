@@ -34,6 +34,21 @@ public class AddressService {
                 .collect(Collectors.toList());
     }
 
+    // 특정 주소 조회
+    @Transactional(readOnly = true)
+    public AddressResponseDto getAddressById(Long userId, Long addressId) {
+
+        AddressEntity address = addressRepository.findById(addressId)
+                .orElseThrow(() -> new EntityNotFoundException("주소 정보를 찾을 수 없습니다. Address ID: " + addressId));
+
+        // 해당 주소가 요청한 유저 소유인지 검증
+        if (!address.getUser().getUserId().equals(userId)) {
+            throw new EntityNotFoundException("접근 권한이 없거나 해당 주소 정보를 찾을 수 없습니다.");
+        }
+
+        return toResponseDto(address);
+    }
+
     // 주소 등록
     @Transactional
     public AddressResponseDto createAddress(Long userId, AddressRequestDto dto) {
