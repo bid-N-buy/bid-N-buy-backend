@@ -122,7 +122,7 @@ public interface AuctionProductsRepository extends JpaRepository<AuctionProducts
             List<SellingStatus> sellingStatuses
     );
 
-    // 판매 완료 수
+    // 판매 완료 수 조회
     long countByUser_UserIdAndDeletedAtIsNull(Long userId);
 
     // 이메일로 특정 유저 경매 상품 조회 - 관리자용
