@@ -31,7 +31,7 @@ public class EmailService {
         MimeMessageHelper helper = new MimeMessageHelper(message, false, "UTF-8"); // MimeMessageHelper 사용
 
         helper.setTo(to);
-        helper.setSubject("[BID-n-BUY] 회원가입 인증 코드: "); // 메일 제목
+        helper.setSubject("[Bid-&-Buy] 회원가입 인증 코드: "); // 메일 제목
 
         String msg = String.format(
                 "<div style=\" width: 540px; height: 600px; border-top: 4px solid #8322BF; margin: 100px auto; padding: 30px 0; box-sizing: border-box;\">" +
@@ -54,7 +54,7 @@ public class EmailService {
         helper.setText(msg, true);
 
         // 보내는 사람 설정
-        helper.setFrom(new InternetAddress(fromEmail, "BID-n-BUY 관리자"));
+        helper.setFrom(new InternetAddress(fromEmail, "Bid-&-Buy 관리자"));
 
         return message;
     }
@@ -113,9 +113,9 @@ public class EmailService {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, false, "UTF-8");
 
-            helper.setFrom(new InternetAddress(fromEmail, "BID-n-BUY 관리자"));
+            helper.setFrom(new InternetAddress(fromEmail, "Bid-&-Buy 관리자"));
             helper.setTo(toEmail);
-            helper.setSubject("[BID-n-BUY] 비밀번호 재설정 임시 비밀번호");
+            helper.setSubject("[Bid-&-Buy] 비밀번호 재설정 임시 비밀번호");
 
             // HTML 내용으로 변경
             String htmlContent = String.format(

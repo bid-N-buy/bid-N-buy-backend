@@ -93,7 +93,7 @@ public class ChatRoomController {
             @AuthenticationPrincipal Long currnetUserId){
         log.info("채팅방 삭제: chatroomId={}, userId={}", chatroomId, currnetUserId);
 
-        chatRoomService.deltedChatRoom(chatroomId, currnetUserId);
+        chatRoomService.deletedChatRoom(chatroomId, currnetUserId);
 
         return ResponseEntity.noContent().build();
     }
