@@ -93,7 +93,7 @@ public class ChatMessageService {
                 .collect(Collectors.toList());
     }
 
-    private ChatMessageDto convertToDto(ChatMessageEntity entity){
+    public ChatMessageDto convertToDto(ChatMessageEntity entity){
         return ChatMessageDto.builder()
                 .chatmessageId(entity.getChatmessageId())
                 .chatroomId(entity.getChatroomId().getChatroomId())

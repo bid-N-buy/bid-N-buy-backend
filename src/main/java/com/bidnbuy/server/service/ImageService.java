@@ -1,5 +1,6 @@
 package com.bidnbuy.server.service;
 
+import com.bidnbuy.server.dto.ChatMessageDto;
 import com.bidnbuy.server.entity.*;
 import com.bidnbuy.server.enums.ImageType;
 import com.bidnbuy.server.repository.*;
@@ -7,6 +8,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +34,8 @@ public class ImageService {
     private final S3UploadService s3UploadService;
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
+    private final ChatMessageService chatMessageService;
+    private final SimpMessagingTemplate messagingTemplate;
 
 
     // 경매 상품 이미지를 S3에 저장하고 S3 URL을 반환
@@ -134,7 +138,14 @@ public class ImageService {
                 .messageType(ChatMessageEntity.MessageType.IMAGE)
                 .isRead(false)
                 .build();
-        chatMessageRepository.save(chatMessage);
+        ChatMessageEntity savedMessage = chatMessageRepository.save(chatMessage);
+        chatRoom.setLastMessagePreview("사진");
+        chatRoom.setLastMessageTime(savedMessage.getCreateAt());
+
+        ChatMessageDto messageDto = chatMessageService.convertToDto(savedMessage);
+
+        String destination = "/topic/chat/room/" + chatRoomId;
+        messagingTemplate.convertAndSend(destination, messageDto);
 
         return s3ImageUrl;
     }

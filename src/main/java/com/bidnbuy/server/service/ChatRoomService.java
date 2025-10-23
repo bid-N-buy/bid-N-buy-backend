@@ -130,7 +130,7 @@ public class ChatRoomService {
     }
 
     @Transactional
-    public void deltedChatRoom(Long chatroomId, Long currentUserId){
+    public void deletedChatRoom(Long chatroomId, Long currentUserId){
         ChatRoomEntity chatRoom = chatRoomRepository.findById(chatroomId)
                 .orElseThrow(()-> new EntityNotFoundException("채팅방을 찾을 수 없습니다."));
 
