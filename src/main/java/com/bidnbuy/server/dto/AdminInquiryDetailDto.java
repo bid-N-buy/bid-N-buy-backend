@@ -27,7 +27,6 @@ public class AdminInquiryDetailDto {
     
     // 관리자
     private Long adminId;
-    private String adminEmail;
     
     // 답변
     private String requestTitle;
