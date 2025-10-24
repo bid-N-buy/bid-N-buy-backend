@@ -95,7 +95,6 @@ public class AdminInquiriesService {
                 .userEmail(inquiry.getUser().getEmail())
                 .userNickname(inquiry.getUser().getNickname())
                 .adminId(inquiry.getAdmin() != null ? inquiry.getAdmin().getAdminId() : null)
-                .adminEmail(inquiry.getAdmin() != null ? inquiry.getAdmin().getEmail() : null)
                 .requestTitle(inquiry.getRequestTitle())
                 .requestContent(inquiry.getRequestContent())
                 .build();
@@ -103,16 +102,15 @@ public class AdminInquiriesService {
 
     // 문의 답변
     @Transactional
-    public void replyToInquiry(Long inquiryId, AdminInquiryReplyRequestDto request) {
-        log.info("관리자 문의 답변 작성: inquiryId={}", inquiryId);
+    public void replyToInquiry(Long inquiryId, AdminInquiryReplyRequestDto request, Long adminId) {
+        log.info("관리자 문의 답변 작성: inquiryId={}, adminId={}", inquiryId, adminId);
         
         InquiriesEntity inquiry = inquiriesRepository.findById(inquiryId)
                 .orElseThrow(() -> new IllegalArgumentException("문의를 찾을 수 없습니다: " + inquiryId));
         
-        // 관리자 정보 설정
-        // TODO 이거 어떻게 처리할지??
-        AdminEntity admin = adminRepository.findById(1L) // 일단 첫번째 관리자 사용
-                .orElseThrow(() -> new IllegalArgumentException("관리자를 찾을 수 없습니다"));
+        // 관리자 set
+        AdminEntity admin = adminRepository.findById(adminId)
+                .orElseThrow(() -> new IllegalArgumentException("관리자를 찾을 수 없습니다: " + adminId));
         
         inquiry.setAdmin(admin);
         inquiry.setRequestTitle(request.getTitle());
@@ -121,7 +119,7 @@ public class AdminInquiriesService {
         inquiry.setUpdateAt(LocalDateTime.now());
         
         inquiriesRepository.save(inquiry);
-        log.info("문의 답변 작성 완료: inquiryId={}, 상태=COMPLETE", inquiryId);
+        log.info("문의 답변 작성 완료: inquiryId={}, adminId={}, 상태=COMPLETE", inquiryId, adminId);
     }
 
     // 문의 상태 변경

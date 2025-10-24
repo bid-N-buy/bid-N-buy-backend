@@ -14,6 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -67,11 +68,14 @@ public class AdminInquiriesController {
     @PostMapping("/{inquiryId}/reply")
     public ResponseEntity<?> replyToInquiry(
             @PathVariable Long inquiryId,
-            @RequestBody AdminInquiryReplyRequestDto request) {
+            @RequestBody AdminInquiryReplyRequestDto request,
+            Authentication authentication) {
         log.info("관리자 문의 답변 요청: inquiryId={}", inquiryId);
         
         try {
-            adminInquiriesService.replyToInquiry(inquiryId, request);
+            // 로그인한 관리자id 추출
+            Long adminId = Long.parseLong(authentication.getName());
+            adminInquiriesService.replyToInquiry(inquiryId, request, adminId);
             return ResponseEntity.ok().body("답변이 성공적으로 작성되었습니다.");
         } catch (IllegalArgumentException e) {
             log.error("문의 답변 실패: {}", e.getMessage());
