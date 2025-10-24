@@ -30,6 +30,7 @@ public class OrderEntity {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "result_id")
     private AuctionResultEntity result;
+
     @Column(nullable = false)
     private String type;
 

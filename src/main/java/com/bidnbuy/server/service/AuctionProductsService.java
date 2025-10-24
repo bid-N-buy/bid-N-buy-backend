@@ -96,7 +96,7 @@ public class AuctionProductsService {
         }
 
         // 알림 추가 - kgb
-        userNotificationService.createNotification(userId, NotificationType.ALERT, "경매가 등록되었습니다.");
+//        userNotificationService.createNotification(userId, NotificationType.ALERT, "경매가 등록되었습니다.");
 
         return savedProducts;
     }
