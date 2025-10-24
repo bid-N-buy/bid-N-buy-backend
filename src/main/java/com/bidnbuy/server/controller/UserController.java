@@ -37,16 +37,14 @@ public class   UserController {
     private final JwtProvider jwtProvider;
     private final EmailService emailService;
     private final ImageService imageService;
-    private final AuctionResultService auctionResultService;
 
     @Autowired
-    public UserController(UserService userService, AuthService authService, JwtProvider jwtProvider, EmailService emailService, ImageService imageService, AuctionResultService auctionResultService){
+    public UserController(UserService userService, AuthService authService, JwtProvider jwtProvider, EmailService emailService, ImageService imageService){
         this.userService = userService;
         this.authService = authService;
         this.jwtProvider = jwtProvider;
         this.emailService = emailService;
         this.imageService = imageService;
-        this.auctionResultService = auctionResultService;
     }
 
     @Value("${naver.client.id}")
@@ -305,7 +303,7 @@ public class   UserController {
     public ResponseEntity<UserProfileSummaryDto> getUserProfile(@AuthenticationPrincipal Long userId, @PathVariable Long targetUserId) {
 
         // AuctionResultService를 사용하여 다른 사용자의 프로필 요약 정보를 가져옵니다.
-        UserProfileSummaryDto profile = auctionResultService.getOtherUserProfile(userId, targetUserId);
+        UserProfileSummaryDto profile = userService.getOtherUserProfile(userId, targetUserId);
 
         return ResponseEntity.ok(profile);
     }
