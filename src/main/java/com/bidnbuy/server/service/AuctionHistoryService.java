@@ -50,10 +50,6 @@ public class AuctionHistoryService {
         List<AuctionHistoryEntity> historyList =
                 historyRepository.findAllByAuctionProduct_AuctionIdOrderByBidTimeAsc(auctionId);
 
-//        if (historyList.isEmpty()) {
-//            throw new IllegalArgumentException("해당 경매 상품의 상태 이력이 없습니다.");
-//        }
-
         return historyList.stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());

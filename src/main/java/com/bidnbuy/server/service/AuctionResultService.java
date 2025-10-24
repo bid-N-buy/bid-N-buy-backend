@@ -31,14 +31,16 @@ public class AuctionResultService {
     private final ImageRepository imageRepository;
     private final AuctionProductsRepository auctionProductsRepository;
 
-    // 마이페이지 기본
+    // 1. 마이페이지 기본
     @Transactional(readOnly = true)
     public MyPageSummaryDto getMyPageSummaryDto(Long userId) {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
 
-        // 마이페이지 최근
+        // 마이페이지 최근 구매
         List<AuctionPurchaseHistoryDto> recentPurchases = getRecentPurchases(userId); // 구매
+        
+        // 마이페이지 최근 판매
         List<AuctionSalesHistoryDto> recentSales = getRecentSales(userId); // 판매
 
         // 온도
@@ -53,6 +55,7 @@ public class AuctionResultService {
                 .build();
     }
 
+    // 2. 마이 페이지 구매내역
     @Transactional(readOnly = true)
     private List<AuctionPurchaseHistoryDto> getRecentPurchases(Long userId) {
 
@@ -65,6 +68,7 @@ public class AuctionResultService {
                 .collect(Collectors.toList());
     }
 
+    // 3. 마이 페이지 판매내역
     @Transactional(readOnly = true)
     private List<AuctionSalesHistoryDto> getRecentSales(Long userId) {
 
@@ -86,7 +90,7 @@ public class AuctionResultService {
                 .collect(Collectors.toList());
     }
 
-    // 마이페이지 - 구매내역  (낙찰 내역) 조회
+    // 마이페이지 - 구매내역(필터링)
     @Transactional(readOnly = true)
     public List<AuctionPurchaseHistoryDto> getPurchaseHistory(Long userId, TradeFilterStatus filterStatus) {
         List<AuctionResultEntity> results = auctionResultRepository.findByWinner_UserId_Optimized(userId);
@@ -97,7 +101,7 @@ public class AuctionResultService {
                 .collect(Collectors.toList());
     }
 
-    // 마이페이지 - 판매 내역 (판매 결과) 조회
+    // 마이페이지 - 판매 내역(필터 적용)
     public List<AuctionSalesHistoryDto> getSalesHistory(Long userId, TradeFilterStatus filterStatus) {
         List<AuctionSalesHistoryDto> salesHistory = new ArrayList<>();
 
@@ -234,31 +238,8 @@ public class AuctionResultService {
                 .build();
     }
 
-    // 다른 유저 조회
-    @Transactional(readOnly = true)
-    public UserProfileSummaryDto getOtherUserProfile(Long userId, Long targetUserId) {
 
-        // 대상 사용자 정보 조회
-        UserEntity user = userRepository.findById(targetUserId)
-                .orElseThrow(() -> new EntityNotFoundException("대상 사용자를 찾을 수 없습니다. ID: " + targetUserId));
-
-        // 통계(구매, 판매)
-        long totalProductsCount = auctionProductsRepository.countByUser_UserIdAndDeletedAtIsNull(targetUserId);
-        long salesCompletedCount = auctionResultRepository.countByAuction_User_UserIdAndResultStatus(
-                targetUserId,
-                ResultStatus.SUCCESS_COMPLETED
-        );
-
-        return UserProfileSummaryDto.builder()
-                .nickname(user.getNickname())
-                .temperature(user.getUserTemperature())
-                .profileImageUrl(user.getProfileImageUrl())
-                .totalProductsCount(totalProductsCount)
-                .salesCompletedCount(salesCompletedCount)
-                .build();
-    }
-
-    // 구매내역에 페이별로 조회
+    // 구매내역에 상태
     private String determineStatusText(AuctionResultEntity result) {
         ResultStatus status = result.getResultStatus();
 

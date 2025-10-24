@@ -1,27 +1,22 @@
 package com.bidnbuy.server.service;
 
+import com.bidnbuy.server.dto.UserProfileSummaryDto;
 import com.bidnbuy.server.dto.UserSignupRequestDto;
 import com.bidnbuy.server.entity.AdminEntity;
 import com.bidnbuy.server.entity.UserEntity;
-import com.bidnbuy.server.repository.AdminRepository;
+import com.bidnbuy.server.enums.ResultStatus;
+import com.bidnbuy.server.repository.*;
 import com.bidnbuy.server.enums.AuthStatus;
 import com.bidnbuy.server.enums.UserStatus;
 import com.bidnbuy.server.exception.CustomAuthenticationException;
-import com.bidnbuy.server.repository.RefreshTokenRepository;
-import com.bidnbuy.server.repository.UserRepository;
-import jakarta.transaction.Transactional;
-import lombok.Data;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.swing.text.html.Option;
+import org.springframework.transaction.annotation.Transactional;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
@@ -37,16 +32,22 @@ public class UserService {
     private final EmailVerificationService emailVerificationService; //회원가입 시에 이메일 인증으로 수정
     private final RefreshTokenRepository refreshTokenRepository;
     private final AdminRepository adminRepository;
+    private final AuctionProductsRepository auctionProductsRepository;
+    private final AuctionResultRepository auctionResultRepository;
 
     public UserService(UserRepository repository, PasswordEncoder passwordEncoder,
                        UserRepository userRepository, EmailVerificationService emailVerificationService,
-                       RefreshTokenRepository refreshTokenRepository, AdminRepository adminRepository) {
+                       RefreshTokenRepository refreshTokenRepository, AdminRepository adminRepository,
+                       AuctionProductsRepository auctionProductsRepository,
+                       AuctionResultRepository auctionResultRepository) {
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
         this.emailVerificationService = emailVerificationService;
         this.refreshTokenRepository = refreshTokenRepository;
         this.adminRepository = adminRepository;
+        this.auctionProductsRepository = auctionProductsRepository;
+        this.auctionResultRepository = auctionResultRepository;
     }
 
     private static final String PASSWORD_REGEX =
@@ -324,6 +325,34 @@ public class UserService {
         }
 
         return savedImageUrl;
+    }
+
+    // 다른 유저 프로필조회
+    @Transactional(readOnly = true)
+    public UserProfileSummaryDto getOtherUserProfile(Long userId, Long targetUserId) {
+
+        if(userId.equals(targetUserId)){
+            throw new RuntimeException(" 자기 자신을 조회 할 수 없습니다.");
+        }
+
+        // 대상 사용자 정보 조회
+        UserEntity user = userRepository.findById(targetUserId)
+                .orElseThrow(() -> new EntityNotFoundException("대상 사용자를 찾을 수 없습니다. ID: " + targetUserId));
+
+        // 통계(구매, 판매)
+        long totalProductsCount = auctionProductsRepository.countByUser_UserIdAndDeletedAtIsNull(targetUserId);
+        long salesCompletedCount = auctionResultRepository.countByAuction_User_UserIdAndResultStatus(
+                targetUserId,
+                ResultStatus.SUCCESS_COMPLETED
+        );
+
+        return UserProfileSummaryDto.builder()
+                .nickname(user.getNickname())
+                .temperature(user.getUserTemperature())
+                .profileImageUrl(user.getProfileImageUrl())
+                .totalProductsCount(totalProductsCount)
+                .salesCompletedCount(salesCompletedCount)
+                .build();
     }
 
     // 유저 닉네임 조회
