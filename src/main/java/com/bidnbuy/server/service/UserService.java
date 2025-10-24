@@ -329,20 +329,15 @@ public class UserService {
 
     // 다른 유저 프로필조회
     @Transactional(readOnly = true)
-    public UserProfileSummaryDto getOtherUserProfile(Long userId, Long targetUserId) {
-
-        if(userId.equals(targetUserId)){
-            throw new RuntimeException(" 자기 자신을 조회 할 수 없습니다.");
-        }
-
+    public UserProfileSummaryDto getOtherUserProfile(Long userId) {
         // 대상 사용자 정보 조회
-        UserEntity user = userRepository.findById(targetUserId)
-                .orElseThrow(() -> new EntityNotFoundException("대상 사용자를 찾을 수 없습니다. ID: " + targetUserId));
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("대상 사용자를 찾을 수 없습니다. ID: " + userId));
 
         // 통계(구매, 판매)
-        long totalProductsCount = auctionProductsRepository.countByUser_UserIdAndDeletedAtIsNull(targetUserId);
+        long totalProductsCount = auctionProductsRepository.countByUser_UserIdAndDeletedAtIsNull(userId);
         long salesCompletedCount = auctionResultRepository.countByAuction_User_UserIdAndResultStatus(
-                targetUserId,
+                userId,
                 ResultStatus.SUCCESS_COMPLETED
         );
 
