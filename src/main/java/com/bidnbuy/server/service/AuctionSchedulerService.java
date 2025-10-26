@@ -70,7 +70,7 @@ public class AuctionSchedulerService {
             orderEntity.setCreatedAt(LocalDateTime.now());
             orderEntity.setUpdatedAt(LocalDateTime.now());
 
-            orderEntity = orderRepository.save(orderEntity);
+          //  orderEntity = orderRepository.save(orderEntity);
         } else {
             //  유찰 (FAILURE)
             resultStatus = ResultStatus.FAILURE;
@@ -93,14 +93,14 @@ public class AuctionSchedulerService {
         AuctionResultEntity savedResult = auctionResultRepository.save(result);
 
         if (orderEntity != null) {
-            orderEntity.setResult(savedResult);
-            orderRepository.save(orderEntity);
+       //     orderEntity.setResult(savedResult);
+       //     orderRepository.save(orderEntity);
         }
 
         // 2. AuctionProductsEntity 상태 FINISH로 업데이트
         auction.setSellingStatus(SellingStatus.FINISH);
 
-        // ✅ 3. History 기록 (AuctionHistoryService의 독립 트랜잭션을 통해 안전하게 저장)
+        //History 기록 (AuctionHistoryService의 독립 트랜잭션을 통해 안전하게 저장)
         auctionHistoryService.recordStatusChange(
                 auction.getAuctionId(),
                 AuctionStatus.FINISHED
