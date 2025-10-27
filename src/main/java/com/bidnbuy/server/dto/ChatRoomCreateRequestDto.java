@@ -11,5 +11,5 @@ public class ChatRoomCreateRequestDto {
     private Long buyerId;
 
     @NotNull
-    private Long auctionId;
+    private Integer auctionId;
 }

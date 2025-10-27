@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 public class AuctionBidDto {
     private Long bidId;
     private Long userId;
-    private Long auctionId;
+    private Integer auctionId;
     private Integer bidPrice;
     private LocalDateTime bidTime;
 }
