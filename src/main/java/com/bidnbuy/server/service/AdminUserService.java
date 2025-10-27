@@ -62,7 +62,7 @@ public class AdminUserService {
         return PagingResponseDto.<AdminUserListDto>builder()
                 .data(dtoList)
                 .totalPages(totalPages)
-                .totalElements((long) totalElements)
+                .totalElements(totalElements)
                 .currentPage(currentPage)
                 .pageSize(pageSize)
                 .isFirst(isFirst)
