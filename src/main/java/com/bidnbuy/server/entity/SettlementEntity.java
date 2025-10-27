@@ -8,6 +8,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
+
 @Entity
 @Getter
 @Setter
@@ -34,7 +35,7 @@ public class SettlementEntity {
     private Integer payoutAmount;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(length = 20, nullable = false)
     private SettlementStatus payoutStatus; // WAITING, DONE, HOLD
 
     // 정산 처리 완료 시각
