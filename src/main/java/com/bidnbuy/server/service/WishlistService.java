@@ -33,7 +33,7 @@ public class WishlistService {
     private final ImageRepository imageRepository;
 
     @Transactional
-    public WishlistDto like(Long userId, Long auctionId) {
+    public WishlistDto like(Long userId, Integer auctionId) {
 
         // 1. 유저 존재하는지 확인
         UserEntity user = userRepository.findById(userId)

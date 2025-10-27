@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @Builder
 public class AuctionCreationResponseDto {
-    private Long auctionId;
+    private Integer auctionId;
     private String title;
     private String message;
 }

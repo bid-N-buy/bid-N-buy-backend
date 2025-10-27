@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ChatRoomListDto {
     private long chatroomId;
-    private long auctionId;
+    private Integer auctionId;
 
     private long counterpartId;
     private String counterpartNickname;
@@ -27,7 +27,7 @@ public class ChatRoomListDto {
     private int unreadCount;
 
     public ChatRoomListDto(
-            Long chatroomId, Long auctionId,
+            Long chatroomId, Integer auctionId,
             Long counterpartId, String counterpartNickname, String counterpartProfileImageUrl,
             String auctionTitle, String auctionImageUrl,
             LocalDateTime lastMessageTime, String lastMessagePreview, int unreadCount){
