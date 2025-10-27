@@ -185,6 +185,12 @@ public class AuctionProductsService {
         AuctionProductsEntity products = auctionProductsRepository.findByIdWithDetails(auctionId)
                 .orElseThrow(() -> new IllegalArgumentException("Auction Not Found with ID: " + auctionId));
 
+        // 로그인한 유저가 찜했는지 확인
+        boolean liked = false;
+        if(userId != null) {
+            liked = wishlistRepository.existsByUser_UserIdAndAuction_AuctionId(userId, auctionId);
+        }
+
         // 이미지 DTO 변환 시 DB에 저장된 영구 URL 사용
         List<ImageDto> imageDtos = products.getImages()
                 .stream()
@@ -305,6 +311,11 @@ public class AuctionProductsService {
         Integer wishCount = wishlistRepository.countByAuction(product);
         String mainImageUrl = imageRepository.findFirstImageUrlByAuctionId(product.getAuctionId())
                 .orElse("default_product.png");
+
+        boolean liked = false;
+        if (product.getUser() != null) {
+            liked = wishlistRepository.existsByUser_UserIdAndAuction_AuctionId(product.getUser().getUserId(), product.getAuctionId());
+        }
 
         return AuctionListResponseDto.builder()
                 .auctionId(product.getAuctionId())
