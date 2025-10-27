@@ -22,14 +22,9 @@ public class SettlementEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long settlementId;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id", nullable = false, unique = true)
-    private OrderEntity order;
-
-    // 판매자 정보 직접 연결
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "seller_id", nullable = false)
-    private UserEntity seller;
+    @JoinColumn(name = "order_id", nullable = false)
+    private OrderEntity order;
 
     @Column(nullable = false)
     private Integer payoutAmount;
@@ -38,12 +33,5 @@ public class SettlementEntity {
     @Column(length = 20, nullable = false)
     private SettlementStatus payoutStatus; // WAITING, DONE, HOLD
 
-    // 정산 처리 완료 시각
     private LocalDateTime payoutAt;
-
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
 }
