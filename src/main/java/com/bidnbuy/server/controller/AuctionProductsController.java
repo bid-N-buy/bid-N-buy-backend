@@ -33,8 +33,9 @@ public class AuctionProductsController {
     @Operation(summary = "상품 등록", description = "상품 등록시 사용되는 API")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "등록 성공",
-                    content = @Content(schema = @Schema(implementation = CreateAuctionDto.class))),
-            @ApiResponse(responseCode = "400", description = "등록 실패")
+                    content = @Content(schema = @Schema(implementation = AuctionCreationResponseDto.class))),
+            @ApiResponse(responseCode = "400", description = "요청 데이터/유효성 검증 실패"),
+            @ApiResponse(responseCode = "401", description = "인증 실패")
     })
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createAuction(
@@ -61,11 +62,24 @@ public class AuctionProductsController {
     }
 
     // 전체 조회 하나로 통일
-    @Operation(summary = "상품 조회", description = "상품 조회시 사용되는 API")
+    @Operation(summary = "상품 조회",
+            description = "상품 조회시 사용되는 API",
+            parameters = {
+                    @Parameter(name = "page", description = "상품 페이지", required = false),
+                    @Parameter(name = "size", description = "상품 개수", required = false),
+                    @Parameter(name = "minPrice", description = "상품 최소가격", required = false),
+                    @Parameter(name = "maxPrice", description = "상품 최대가격", required = false),
+                    @Parameter(name = "sortBy", description = "상품 정렬", required = false),
+                    @Parameter(name = "includeEnded", description = "상품 종료 유무", required = false),
+                    @Parameter(name = "searchKeyword", description = "상품 검색", required = false),
+                    @Parameter(name = "mainCategoryId", description = "상품 대분류", required = false),
+                    @Parameter(name = "subCategoryId", description = "상품 소분류", required = false),
+                    @Parameter(name = "userEmail", description = "유저 이메일(관리자 전용)", required = false),
+            })
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공",
-                    content = @Content(schema = @Schema(implementation = AuctionListResponseDto.class))),
-            @ApiResponse(responseCode = "400", description = "조회 실패")
+                    content = @Content(schema = @Schema(implementation = PagingResponseDto.class))),
+            @ApiResponse(responseCode = "401", description = "조회 실패")
     })
     @GetMapping
     public ResponseEntity<PagingResponseDto<AuctionListResponseDto>> getAllAuctions(
@@ -106,18 +120,34 @@ public class AuctionProductsController {
         return ResponseEntity.ok(list);
     }
 
+    @Operation(summary = "사용자 상품 상세조회", description = "사용자 상품 상세조회 API")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "상세조회 성공"),
+            @ApiResponse(responseCode = "401", description = "상세조회 실패")
+    })
     @GetMapping("/{auctionId}")
     public ResponseEntity<?> getAuctionFind(
             @AuthenticationPrincipal Long userId,
+            @Parameter(description = "조회할 경매 상품 ID", required = true)
             @PathVariable Long auctionId
     ) {
         AuctionFindDto find = auctionProductsService.getAuctionFind(auctionId, userId);
         return ResponseEntity.ok(find);
     }
 
+    @Operation(summary = "사용자 상품 삭제", description = "사용자 상품삭제 API")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "삭제 성공 (No Content)"),
+            @ApiResponse(responseCode = "400", description = "경매 진행 상태(판매 중 등)로 인해 삭제 불가",
+                    content = @Content(schema = @Schema(example = "경매가 이미 시작되었거나 낙찰되었습니다."))),
+            @ApiResponse(responseCode = "403", description = "본인 상품이 아니어서 권한 없음"),
+            @ApiResponse(responseCode = "404", description = "해당 ID의 상품을 찾을 수 없음"),
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+    })
     @DeleteMapping("/{auctionId}")
     public ResponseEntity<?> deleteAuction(
             @AuthenticationPrincipal Long userId,
+            @Parameter(description = "조회할 경매 상품 ID", required = true)
             @PathVariable Long auctionId
     ) {
         try {
@@ -138,8 +168,18 @@ public class AuctionProductsController {
     }
 
     // 관리자용 경매 삭제
+    @Operation(summary = "관리자용 경매 상품 강제 삭제", description = "관리자 상품 삭제API")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "삭제 성공 (No Content)"),
+            @ApiResponse(responseCode = "401", description = "인증 실패 (로그인이 필요함)"),
+            @ApiResponse(responseCode = "403", description = "권한 부족 (관리자 권한이 아님)"),
+            @ApiResponse(responseCode = "404", description = "해당 ID의 상품을 찾을 수 없음",
+                    content = @Content(schema = @Schema(example = "해당 상품 존재하지 않습니다."))),
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류",
+                    content = @Content(schema = @Schema(example = "삭제 중 오류가 발생했습니다.")))
+    })
     @DeleteMapping("/admin/{auctionId}")
-    public ResponseEntity<?> deleteAuctionByAdmin(@PathVariable Long auctionId) {
+    public ResponseEntity<?> deleteAuctionByAdmin(@Parameter(description = "조회할 경매 상품 ID", required = true) @PathVariable Long auctionId) {
         try {
             auctionProductsService.deleteAuctionByAdmin(auctionId);
             return ResponseEntity.noContent().build();
