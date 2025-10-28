@@ -89,7 +89,8 @@ public class UserEntity {
     private String profileImageUrl;
 
     // 유저 온도 (별점 평균 × 10)
-    @Column(name = "user_temperature", nullable = false)
+    @Builder.Default
+    @Column(name = "user_temperature", nullable = false, columnDefinition = "double default 0.0")
     private Double userTemperature = 0.0;
 
     // 페널티 (누적 점수)

@@ -46,7 +46,7 @@ public class NotificationController {
         return Map.of("message", "전체 알림이 삭제되었습니다");
     }
 
-    // userId == null 이면 전체공지, 아니면 경고
+    // userId == null 이면 전체공지, 아니면 경고 발송
     @PostMapping
     public ResponseEntity<?> sendNotification(@RequestBody AdminNotificationRequest request) {
         if (request.getUserId() == null) {
