@@ -165,6 +165,7 @@ public class PaymentService {
      */
     @Transactional
     public PaymentEntity saveConfirmedPayment(PaymentResponseDto dto) {
+        log.info("⚡ saveConfirmedPayment 시작, orderId={}", dto.getOrderId());
         PaymentEntity payment = paymentRepository.findByMerchantOrderId(dto.getOrderId())
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Payment not found by merchantOrderId: " + dto.getOrderId()));
@@ -189,6 +190,7 @@ public class PaymentService {
 
         PaymentEntity savedPayment = paymentRepository.save(payment);
 
+
         // 결제진행 완료
         if (newStatus == paymentStatus.PaymentStatus.SUCCESS) {
             OrderEntity order = savedPayment.getOrder();
@@ -206,55 +208,38 @@ public class PaymentService {
             order.setUpdatedAt(LocalDateTime.now());
             orderRepository.save(order);
 
-            // 경매 결과 조회
-            List<AuctionResultEntity> results = auctionResultRepository.findByOrder_OrderId(orderId);
 
-            // 있으면 상태만 변경 없으면 결과 생성
-            if (!results.isEmpty()) {
-                // 기존 결과 업데이트
-                AuctionResultEntity result = results.get(0);
-                result.setResultStatus(ResultStatus.SUCCESS_PAID);
-                auctionResultRepository.save(result);
-            } else {
-                // 새로운 결과 생성
-                Long auctionId = dto.getAuctionId();  // 프론트에서 받아온 auctionId
-                if (auctionId == null) {
-                    throw new IllegalArgumentException("결제 승인에 필요한 auctionId가 없습니다.");
-                }
-
-                AuctionProductsEntity auction = auctionProductsRepository.findById(auctionId)
-                        .orElseThrow(() -> new IllegalArgumentException("경매를 찾을 수 없습니다. auctionId=" + auctionId));
-
-// history 생성
-                AuctionHistoryEntity history = AuctionHistoryEntity.builder()
-                        .auctionProduct(auction)
-                        .previousStatus(AuctionStatus.PAYMENT_PENDING) // 기존 상태
-                        .newStatus(AuctionStatus.PAYMENT_COMPLETED) // 결제 완료
-                        .bidTime(LocalDateTime.now())
-                        .build();
-
-                auctionHistoryRepository.save(history);
-
-// result 생성
-                AuctionResultEntity result = AuctionResultEntity.builder()
-                        .auction(auction)
-                        .winner(order.getBuyer())
-                        .resultStatus(ResultStatus.SUCCESS_PAID) // ResultStatus는 SUCCESS_PAID
-                        .finalPrice(savedPayment.getTotalAmount())
-                        .history(history) // 방금 만든 history 연결
-                        .order(order)
-                        .closedAt(LocalDateTime.now())
-                        .build();
-
-                auctionResultRepository.save(result);
-
-                // Order와 Result 연결
-                order.setResult(result);
-                orderRepository.save(order);
-                
-                // Settlement 생성 (정산 정보)
-                settlementService.createSettlement(order, savedPayment.getTotalAmount());
+            //  항상 새로 AuctionResult 생성
+            Long auctionId = dto.getAuctionId();  // 프론트에서 받아온 auctionId
+            if (auctionId == null) {
+                throw new IllegalArgumentException("결제 승인에 필요한 auctionId가 없습니다.");
             }
+
+            AuctionProductsEntity auction = auctionProductsRepository.findById(auctionId)
+                    .orElseThrow(() -> new IllegalArgumentException("경매를 찾을 수 없습니다. auctionId=" + auctionId));
+
+            // history 생성
+            AuctionHistoryEntity history = AuctionHistoryEntity.builder()
+                    .auctionProduct(auction)
+                    .previousStatus(AuctionStatus.PAYMENT_PENDING)
+                    .newStatus(AuctionStatus.PAYMENT_COMPLETED)
+                    .bidTime(LocalDateTime.now())
+                    .build();
+            auctionHistoryRepository.save(history);
+
+
+            // 기존 result 조회 후 상태 업데이트
+            AuctionResultEntity result = auctionResultRepository.findByOrder_OrderId(orderId)
+                    .stream()
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("❌ 결제 승인 시 AuctionResult가 존재하지 않습니다. orderId=" + orderId));
+
+            result.setResultStatus(ResultStatus.SUCCESS_PAID);
+            result.setHistory(history); // 히스토리 연결
+            auctionResultRepository.save(result);
+
+            // Settlement 생성 (정산 정보)
+            settlementService.createSettlement(order, savedPayment.getTotalAmount());
         }
 
         // 2. Toss 응답 상태가 COMPLETED일 경우 (최종 거래 완료 상태)
@@ -268,55 +253,25 @@ public class PaymentService {
                 orderRepository.save(order);
             }
 
-            // auctionResult 상태 변경 or 생성
-            List<AuctionResultEntity> results =
-                    auctionResultRepository.findByOrder_OrderId(savedPayment.getOrder().getOrderId());
-
-            if (!results.isEmpty()) {
-                AuctionResultEntity result = results.get(0);
-                result.setResultStatus(ResultStatus.SUCCESS_COMPLETED); // 최종 거래 완료 상태
-                auctionResultRepository.save(result);
-            } else {
-                // 새로운 결과 생성
-                Long auctionId = dto.getAuctionId();  // 프론트에서 받아온 auctionId
-                if (auctionId == null) {
-                    throw new IllegalArgumentException("결제 승인에 필요한 auctionId가 없습니다.");
-                }
-
-                AuctionProductsEntity auction = auctionProductsRepository.findById(auctionId)
-                        .orElseThrow(() -> new IllegalArgumentException("경매를 찾을 수 없습니다. auctionId=" + auctionId));
-
-                // 1) 결제 성공 시 (PAID)
-
-// history 생성
-                AuctionHistoryEntity history = AuctionHistoryEntity.builder()
-                        .auctionProduct(auction)
-                        .previousStatus(AuctionStatus.PAYMENT_PENDING) // 기존 상태
-                        .newStatus(AuctionStatus.PAYMENT_COMPLETED) // 결제 완료
-                        .bidTime(LocalDateTime.now())
-                        .build();
-
-                auctionHistoryRepository.save(history);
-
-// result 생성
-                AuctionResultEntity result = AuctionResultEntity.builder()
-                        .auction(auction)
-                        .winner(order.getBuyer())
-                        .resultStatus(ResultStatus.SUCCESS_PAID) // ResultStatus는 SUCCESS_PAID
-                        .finalPrice(savedPayment.getTotalAmount())
-                        .history(history) // 방금 만든 history 연결
-                        .order(order)
-                        .closedAt(LocalDateTime.now())
-                        .build();
-
-                auctionResultRepository.save(result);
-
-                // Order와 Result 연결
-                order.setResult(result);
-                orderRepository.save(order);
+            //
+            Long auctionId = dto.getAuctionId();  // 프론트에서 받아온 auctionId
+            if (auctionId == null) {
+                throw new IllegalArgumentException("결제 승인에 필요한 auctionId가 없습니다.");
             }
 
-            // 정산처리 나중에
+            AuctionProductsEntity auction = auctionProductsRepository.findById(auctionId)
+                    .orElseThrow(() -> new IllegalArgumentException("경매를 찾을 수 없습니다. auctionId=" + auctionId));
+
+            // history 생성
+            AuctionHistoryEntity history = AuctionHistoryEntity.builder()
+                    .auctionProduct(auction)
+                    .previousStatus(AuctionStatus.PAYMENT_PENDING)
+                    .newStatus(AuctionStatus.PAYMENT_COMPLETED)
+                    .bidTime(LocalDateTime.now())
+                    .build();
+            auctionHistoryRepository.save(history);
+
+            // Settlement 생성 (정산 정보)
         }
 
         // 3. 결제 취소/실패 처리
