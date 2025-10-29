@@ -5,18 +5,22 @@ import com.bidnbuy.server.entity.OrderEntity;
 import com.bidnbuy.server.entity.SettlementEntity;
 import com.bidnbuy.server.enums.ResultStatus;
 import com.bidnbuy.server.enums.SettlementStatus;
+import com.bidnbuy.server.repository.OrderRepository;
 import com.bidnbuy.server.repository.SettlementRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SettlementService {
 
     private final SettlementRepository settlementRepository;
+    private final OrderRepository orderRepository;
 
     // 정산 등록(결제 완료 이후)
     @Transactional

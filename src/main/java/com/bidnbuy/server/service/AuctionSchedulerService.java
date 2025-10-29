@@ -34,9 +34,11 @@ public class AuctionSchedulerService {
                 SellingStatus.FINISH
         );
 
+        System.out.println("!!!!!!!");
         if (finishedAuctions.isEmpty()) {
             return;
         }
+        System.out.println("?????????????????????");
 
         log.info("마감 시간이 된 경매 상품 수: {}", finishedAuctions.size());
 
@@ -134,27 +136,45 @@ public class AuctionSchedulerService {
 
 
         AuctionProductsEntity auction = result.getAuction();
+//
+//        // 이미 종료된 경매면 중복 종료방지
+//        if (auction.getSellingStatus() == SellingStatus.FINISH) {
+//            log.info("⚠️ 이미 종료된 경매입니다. auctionId={}", auction.getAuctionId());
+//            return;
+//        }
+//
+//        // 경매 상태 FINISH로 변경 및 저장
+//        auction.setSellingStatus(SellingStatus.FINISH);
+//        auctionProductsRepository.save(auction);
+//
+//        // 경매 결과 UCCESS_PAID 변경 및 저장
+//        result.setResultStatus(ResultStatus.SUCCESS_PAID);
+//        auctionResultRepository.save(result);
+//
+//        // 경매기록
+//        auctionHistoryService.recordStatusChange(
+//                auction.getAuctionId(),
+//                AuctionStatus.FINISHED
+//        );
+//
+//        log.info("💰 결제 완료로 인한 경매 강제 종료 처리 완료: 경매 ID {}", auction.getAuctionId());
 
-        // 이미 종료된 경매면 중복 종료방지
-        if (auction.getSellingStatus() == SellingStatus.FINISH) {
-            log.info("⚠️ 이미 종료된 경매입니다. auctionId={}", auction.getAuctionId());
-            return;
-        }
+        // ⭐ 무조건 새 Result 생성
+        AuctionResultEntity result1 = AuctionResultEntity.builder()
+                .auction(auction)
+                .winner(order.getBuyer())
+                .order(order)
+                .finalPrice(auction.getCurrentPrice())
+                .resultStatus(ResultStatus.SUCCESS_PAID)
+                .closedAt(LocalDateTime.now())
+                .build();
 
-        // 경매 상태 FINISH로 변경 및 저장
+        auctionResultRepository.save(result1);
+
         auction.setSellingStatus(SellingStatus.FINISH);
         auctionProductsRepository.save(auction);
 
-        // 경매 결과 UCCESS_PAID 변경 및 저장
-        result.setResultStatus(ResultStatus.SUCCESS_PAID);
-        auctionResultRepository.save(result);
+        auctionHistoryService.recordStatusChange(auction.getAuctionId(), AuctionStatus.FINISHED);
 
-        // 경매기록
-        auctionHistoryService.recordStatusChange(
-                auction.getAuctionId(),
-                AuctionStatus.FINISHED
-        );
-
-        log.info("💰 결제 완료로 인한 경매 강제 종료 처리 완료: 경매 ID {}", auction.getAuctionId());
     }
 }

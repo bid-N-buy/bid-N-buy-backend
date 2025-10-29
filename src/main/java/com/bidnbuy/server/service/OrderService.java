@@ -1,18 +1,13 @@
 package com.bidnbuy.server.service;
 
 import com.bidnbuy.server.dto.*;
-import com.bidnbuy.server.entity.AuctionResultEntity;
-import com.bidnbuy.server.entity.ChatRoomEntity;
-import com.bidnbuy.server.entity.OrderEntity;
-import com.bidnbuy.server.entity.UserEntity;
+import com.bidnbuy.server.entity.*;
 import com.bidnbuy.server.enums.ResultStatus;
-import com.bidnbuy.server.repository.AuctionResultRepository;
-import com.bidnbuy.server.repository.ChatRoomRepository;
-import com.bidnbuy.server.repository.OrderRepository;
-import com.bidnbuy.server.repository.UserRepository;
+import com.bidnbuy.server.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -20,6 +15,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderService {
@@ -30,7 +26,7 @@ public class OrderService {
     private final AuctionResultRepository auctionResultRepository;
     private final ChatMessageService chatMessageService;
     private final ChatRoomRepository chatRoomRepository;
-
+    private final AuctionProductsRepository auctionProductsRepository;
     // 볍점 부여
     @Transactional
     public void rateOrder(Long orderId, Long buyerId, int rating) {
@@ -117,14 +113,14 @@ public class OrderService {
     }
 
     //채팅방 아이디 찾기
-    private Long findChatRoomIdForOrder(OrderEntity order){
+    private Long findChatRoomIdForOrder(OrderEntity order) {
         Long buyerId = order.getBuyer().getUserId();
         Long sellerId = order.getSeller().getUserId();
 
         //경매 아이디 추출
         AuctionResultEntity result = order.getResult();
-        if(result == null || result.getAuction() == null){
-            throw new IllegalArgumentException("주문 id "+order.getOrderId()+"에 경매결과 누락");
+        if (result == null || result.getAuction() == null) {
+            throw new IllegalArgumentException("주문 id " + order.getOrderId() + "에 경매결과 누락");
         }
         Long auctionProductId = result.getAuction().getAuctionId();
 
@@ -133,7 +129,7 @@ public class OrderService {
                         buyerId,
                         sellerId,
                         auctionProductId
-                ).orElseThrow(()->new EntityNotFoundException("주문 id"+order.getOrderId()+"와 관련된 채팅방을 찾을 수 없음"));
+                ).orElseThrow(() -> new EntityNotFoundException("주문 id" + order.getOrderId() + "와 관련된 채팅방을 찾을 수 없음"));
         return chatRoom.getChatroomId();
     }
 
@@ -246,6 +242,11 @@ public class OrderService {
         UserEntity buyer = userRepository.findById(dto.getBuyerId())
                 .orElseThrow(() -> new IllegalArgumentException("Buyer not found: " + dto.getBuyerId()));
 
+        // ⭐ auctionId → AuctionProductsEntity 변환
+        AuctionProductsEntity auction = auctionProductsRepository.findById(dto.getAuctionId())
+                .orElseThrow(() -> new IllegalArgumentException("Auction not found: " + dto.getAuctionId()));
+
+
 
         OrderEntity order = new OrderEntity();
         order.setSeller(seller);
@@ -256,16 +257,32 @@ public class OrderService {
         order.setCreatedAt(LocalDateTime.now());
         order.setUpdatedAt(LocalDateTime.now());
 
-        // resultId 저장
-        AuctionResultEntity result = auctionResultRepository
-                .findFirstByWinner_UserIdAndOrderIsNullOrderByClosedAtDesc(dto.getBuyerId())
-                .orElseThrow(() -> new IllegalArgumentException("유효한 경매 결과가 없습니다."));
+        // ⭐ result 직접 생성
+        AuctionResultEntity result = AuctionResultEntity.builder()
+                .auction(auction)
+                .winner(buyer) // 구매자 == 낙찰자
+                .order(order)
+                .resultStatus(ResultStatus.SUCCESS_PENDING_PAYMENT) // 기본 상태
+                .finalPrice(auction.getCurrentPrice())
+                .closedAt(LocalDateTime.now())
+                .build();
+
 
         order.setResult(result);
-        result.setOrder(order);
 
 
+
+        // 저장
         OrderEntity saved = orderRepository.save(order);
+        auctionResultRepository.save(result);
+
+        // resultId 저장
+//        AuctionResultEntity result = auctionResultRepository
+//                .findFirstByWinner_UserIdAndOrderIsNullOrderByClosedAtDesc(dto.getBuyerId())
+//                .orElseThrow(() -> new IllegalArgumentException("유효한 경매 결과가 없습니다."));
+//
+//        order.setResult(result);
+//        result.setOrder(order);
 
         return OrderResponseDto.builder()
                 .orderId(saved.getOrderId())
