@@ -36,4 +36,8 @@ public interface AuctionResultRepository extends JpaRepository<AuctionResultEnti
 
     // Order과 연결
     Optional<AuctionResultEntity> findByOrder(OrderEntity order);
+
+    // auctionId로 orderId 조회
+    @Query("SELECT r.order.orderId FROM AuctionResultEntity r WHERE r.auction.auctionId = :auctionId")
+    Long findOrderIdByAuctionId(@Param("auctionId") Long auctionId);
 }

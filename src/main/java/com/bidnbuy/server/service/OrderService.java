@@ -38,9 +38,9 @@ public class OrderService {
             throw new IllegalStateException("본인의 거래만 평가할 수 있습니다.");
         }
 
-        // 2) 주문 상태 확인 (완료 상태만 가능)
-        if (!"COMPLETED".equalsIgnoreCase(order.getOrderStatus())) {
-            throw new IllegalStateException("거래 완료 상태에서만 별점을 줄 수 있습니다.");
+        // 2) 주문 상태 확인 (결제 상태만 가능)
+        if (!"PAID".equalsIgnoreCase(order.getOrderStatus())) {
+            throw new IllegalStateException("결제 완료 상태에서만 별점을 줄 수 있습니다.");
         }
 
         // 3) 이미 별점 등록된 경우 방지
