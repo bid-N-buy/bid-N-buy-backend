@@ -104,6 +104,7 @@ public class AuctionProductsService {
     // 전체 리스트 출력
     @Transactional(readOnly = true)
     public PagingResponseDto<AuctionListResponseDto> getAllAuctions(
+            Long userId,
             int page,
             int size,
             Integer minPrice,
@@ -142,7 +143,7 @@ public class AuctionProductsService {
         }
 
         // 3. DTO 변환 및 반환
-        return buildPagingResponse(auctionPage);
+        return buildPagingResponse(auctionPage, userId);
     }
 //
 //    @Transactional(readOnly = true)
@@ -230,6 +231,11 @@ public class AuctionProductsService {
 
         }
 
+        boolean liked = false;
+        if (userId != null) {
+            liked = wishlistRepository.existsByUser_UserIdAndAuction_AuctionId(userId, products.getAuctionId());
+        }
+
         // 최종 DTO 빌드 및 반환
         return AuctionFindDto.builder()
                 .auctionId(products.getAuctionId())
@@ -250,6 +256,7 @@ public class AuctionProductsService {
                 .images(imageDtos)
                 .sellingStatus(sellingStatus)
                 .wishCount(wishCount)
+                .liked(liked)
                 .sellerTemperature(sellerTemperature)
                 .build();
     }
@@ -306,15 +313,15 @@ public class AuctionProductsService {
     }
 
     // DTO 매핑 유틸리티 (목록용) - 이 메서드는 실제 엔티티를 DTO로 변환하는 상세 로직이 필요합니다.
-    private AuctionListResponseDto mapToAuctionListResponseDto(AuctionProductsEntity product) {
+    private AuctionListResponseDto mapToAuctionListResponseDto(AuctionProductsEntity product, Long userId) {
         // 이 부분은 기존에 구현했던 AuctionListResponseDto 매핑 로직을 사용해야 합니다.
         Integer wishCount = wishlistRepository.countByAuction(product);
         String mainImageUrl = imageRepository.findFirstImageUrlByAuctionId(product.getAuctionId())
                 .orElse("default_product.png");
 
         boolean liked = false;
-        if (product.getUser() != null) {
-            liked = wishlistRepository.existsByUser_UserIdAndAuction_AuctionId(product.getUser().getUserId(), product.getAuctionId());
+        if (userId != null) {
+            liked = wishlistRepository.existsByUser_UserIdAndAuction_AuctionId(userId, product.getAuctionId())
         }
 
         return AuctionListResponseDto.builder()
@@ -329,13 +336,14 @@ public class AuctionProductsService {
                 .sellerNickname(product.getUser().getNickname())
                 .mainImageUrl(mainImageUrl)
                 .wishCount(wishCount)
+                .liked(liked)
                 .build();
     }
 
     // 페이징 응답 DTO 빌더 유틸리티
-    private PagingResponseDto<AuctionListResponseDto> buildPagingResponse(Page<AuctionProductsEntity> auctionPage) {
+    private PagingResponseDto<AuctionListResponseDto> buildPagingResponse(Page<AuctionProductsEntity> auctionPage, Long userId) {
         List<AuctionListResponseDto> dtoList = auctionPage.getContent().stream()
-                .map(this::mapToAuctionListResponseDto)
+                .map(product -> mapToAuctionListResponseDto(product, userId))
                 .toList();
 
         return PagingResponseDto.<AuctionListResponseDto>builder()

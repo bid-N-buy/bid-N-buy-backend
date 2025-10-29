@@ -83,6 +83,7 @@ public class AuctionProductsController {
     })
     @GetMapping
     public ResponseEntity<PagingResponseDto<AuctionListResponseDto>> getAllAuctions(
+            @AuthenticationPrincipal Long userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) Integer minPrice,
@@ -106,6 +107,7 @@ public class AuctionProductsController {
         }
 
         PagingResponseDto<AuctionListResponseDto> list = auctionProductsService.getAllAuctions(
+                userId,
                 page,
                 size,
                 minPrice,
