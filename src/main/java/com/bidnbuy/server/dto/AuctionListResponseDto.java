@@ -19,4 +19,5 @@ public class AuctionListResponseDto {
     //private String categoryName;  // 필터링이나 표시를 위해 포함
     private String sellerNickname;
     private Integer wishCount;
+    private Boolean liked;
 }

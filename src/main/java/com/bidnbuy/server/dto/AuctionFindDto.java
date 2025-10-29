@@ -51,6 +51,7 @@ public class AuctionFindDto {
 
     // 7. 찜 카운트
     private Integer wishCount;
+    private Boolean liked;
 
 
     public AuctionFindDto(AuctionProductsEntity entity) {
