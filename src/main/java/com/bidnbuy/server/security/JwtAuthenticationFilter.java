@@ -42,8 +42,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String path = request.getRequestURI().substring(contextPath.length());
         log.info("###################3shouldNotFilter path: {}", path);
 //        if(path.startsWith("/auth")){
-        // auth, admin auth 전체 경로 필터 스킵 (authorization 헤더 유무 무관)
-        if (path.startsWith("/auth/") || path.equals("/auth") || path.startsWith("/admin/auth/") || path.equals("/admin/auth")) {
+        // admin auth 쪽 스킵
+        if (path.startsWith("/admin/auth/") || path.equals("/admin/auth")) {
+            return true;
+        }
+        // auth 공개 엔드포인트 스킵
+        if (
+                path.equals("/auth/signup") ||
+                path.equals("/auth/login") ||
+                path.equals("/auth/reissue") ||
+                path.startsWith("/auth/kakao") ||
+                path.startsWith("/auth/naver") ||
+                path.startsWith("/auth/email") ||
+                path.startsWith("/auth/password")
+        ) {
             return true;
         }
         // 공개 리소스 스킵
