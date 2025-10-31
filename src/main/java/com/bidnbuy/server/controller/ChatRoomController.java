@@ -23,6 +23,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import javax.sound.midi.VoiceStatus;
 import java.util.List;
 
 @Tag(name = "체팅 방 관련 API", description = "채팅 방 관련 기능 제공")
@@ -158,6 +159,24 @@ public class ChatRoomController {
         return ResponseEntity.ok(count);
     }
 
+    @Operation(
+            summary = "채팅방 삭제",
+            description = "특정 채팅방 삭제(소프트 딜리트)",
+            tags={"체팅 방 관련 API"}
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "204",
+            description = "인증 정보 없음",
+            content = @Content(schema = @Schema(implementation = Void.class))
+        ),
+        @ApiResponse(
+            responseCode = "401",
+            description = "채팅방 삭제 성공",
+            content = @Content(schema = @Schema(type = "string", example = "인증되지 않은 사용자"))
+        )
+
+})
     @DeleteMapping("/{chatroomId}")
     public ResponseEntity<Void> deleteChatRoom(
             @PathVariable Long chatroomId,
