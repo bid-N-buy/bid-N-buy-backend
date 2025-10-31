@@ -6,6 +6,7 @@ import com.bidnbuy.server.exception.CustomAuthenticationException;
 import com.bidnbuy.server.security.JwtProvider;
 import com.bidnbuy.server.service.*;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -110,7 +111,6 @@ public class   UserController {
         @ApiResponse(responseCode = "500", description = "서버 오류 발생",
             content = @Content(schema = @Schema(implementation = ResponseDto.class, example = "서버 내부 오류 발생")))
     })
-
     //토큰 재발급
     @PostMapping("/reissue")
     public ResponseEntity<?> reissueToken(@RequestBody TokenReissueRequestDto requestDto){
@@ -131,6 +131,8 @@ public class   UserController {
 
     }
 
+    @Operation(summary = "카카오 로그인 콜백", description = "카카오 인증 후 리다이렉트 엔드포인트" , tags = {"유저 API"}, hidden = true)
+    @Parameter(name = "code", description = "카카오로에서 받은 인증 코드", required = true)
     @GetMapping("/kakao")
     public void kakaoLogin (@RequestParam("code") String code, HttpServletResponse response) throws IOException {
         try {
@@ -148,7 +150,7 @@ public class   UserController {
             response.sendRedirect(errorRedirectUrl);
         }
     }
-
+    @Operation(summary = "네이버 로그인", description = "네이버 인증 후 리다이렉트" , tags = {"유저 API"})
     @GetMapping("/naver/loginstart")
     public RedirectView redirectToNaver(HttpSession session){
         String state = jwtProvider.generateStateToken();
@@ -162,7 +164,9 @@ public class   UserController {
         //http://localhost:8080/auth/naver/loginstart
     }
 
-
+    @Operation(summary = "네이버 로그인 콜백", description = "네이버 인증 후 리다이렉트 엔드포인트" , tags = {"유저 API"}, hidden = true)
+    @Parameter(name = "code", description = "네이버에서 받은 인증 코드", required = true)
+    @Parameter(name = "state", description = "세션에 저장된 상태 토큰", required = true)
     @GetMapping("/naver")
     public void naverLogin (@RequestParam("code") String code, @RequestParam("state") String state,
                             HttpSession session, HttpServletResponse response) throws IOException{
