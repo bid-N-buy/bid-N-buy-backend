@@ -107,6 +107,44 @@ public class ChatController {
         return ResponseEntity.ok().build();
     }
 
+
+    @Operation(
+        summary = "채팅방 이미지, 메세지 전송",
+        description = "이미지 파일, 선택적 텍스트 메시지 전송, 이미지는 업로드 후 STOMP통해 채팅방에 발행, S3로 저장",
+        tags={"채팅 메시지 API"}
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "이미지 업로드 및 메시지 전송 성공",
+            content = @Content(schema = @Schema(type = "string", example ="https://s3.example.com/bidnbuy_123.jpg"))
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "잘못된 요청",
+            content = @Content(schema = @Schema(type = "string", example ="파일을 찾을 수 없습니다."))
+        ),
+        @ApiResponse(
+            responseCode = "401",
+            description = "인증 정보 없음",
+            content = @Content(schema = @Schema(type = "string", example="인증되지 않은 사용자"))
+        ),
+        @ApiResponse(
+            responseCode = "403",
+            description = "올바르지 않은 사용자 id",
+            content = @Content(schema = @Schema(type = "string", example="올바르지 않은 사용자 id"))
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "채팅방 혹은 사용자를 찾을 수 없음",
+            content = @Content(schema = @Schema(type = "string", example="채팅방을 찾을 수 없습니다."))
+        ),
+        @ApiResponse(
+            responseCode = "500",
+            description = "이미지 업로드 중 서버 오류 발생",
+            content = @Content(schema = @Schema(type = "string", example = "이미지 업로드 중 서버 오류 발생"))
+        )
+    })
     @PostMapping("/chat/{chatroomId}/image")
     public ResponseEntity<String> uploadChatImage(@PathVariable Long chatroomId,
                                                   Principal principal,
