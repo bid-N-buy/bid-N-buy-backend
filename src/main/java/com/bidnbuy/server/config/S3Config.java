@@ -12,13 +12,13 @@ import software.amazon.awssdk.services.s3.S3Client;
 //TODO: aws 키발급 받으면 WebMvcConfig, WebConfig 삭제
 public class S3Config {
 
-    @Value("${cloud.aws.credentials.access-key}")
+    @Value("${SPRING_AWS_ACCESS_KEY_ID}")
     private String accessKey;
 
-    @Value("${cloud.aws.credentials.secret-key}")
+    @Value("${SPRING_AWS_SECRET_ACCESS_KEY}")
     private String secretKey;
 
-    @Value("${cloud.aws.region.static}")
+    @Value("${SPRING_AWS_REGION}")
     private String region;
 
     @Bean

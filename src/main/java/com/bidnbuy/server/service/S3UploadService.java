@@ -17,10 +17,10 @@ public class S3UploadService {
 
     private final S3Client s3Client;
 
-    @Value("${cloud.aws.s3.bucket}")
+    @Value("${SPRING_AWS_S3_BUCKET}")
     private String bucket;
 
-    @Value("${cloud.aws.region.static}")
+    @Value("${SPRING_AWS_REGION}")
     private String region;
 
     public S3UploadService(S3Client s3Client) {
