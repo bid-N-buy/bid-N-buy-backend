@@ -300,6 +300,12 @@ public class   UserController {
     }
 
     //회원탈퇴
+    @Operation(summary = "회원 탈퇴", description = "사용자 ID와 비밀번호를 확인하여 계정을 삭제합니다.", tags = {"유저 API"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204",description = "회원 탈퇴 성공"),
+            @ApiResponse(responseCode = "401",description = "인증 실패 (비밀번호 불일치)"),
+            @ApiResponse(responseCode = "404",description = "사용자를 찾을 수 없음")
+    })
     @DeleteMapping("/user/{userId}")
     public ResponseEntity<?> deleteUser(@PathVariable Long userId, @RequestBody DeleteUserDto requestDto){
         String inputPassword = requestDto.getPassword();
