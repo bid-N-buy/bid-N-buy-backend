@@ -245,6 +245,13 @@ public class   UserController {
         }
     }
 
+    @Operation(summary = "비밀번호 재설정", description = "임시 비밀번호 확인 후 새 비밀번호로 최종 변경합니다.", tags = {"유저 API"})
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200",description = "비밀번호 재설정 성공",
+            content = @Content(schema = @Schema(type = "string", example = "새 비밀번호 성공적으로 설정 완료")) ),
+        @ApiResponse(responseCode = "400",description = "요청 오류 또는 재설정 조건 불일치",
+            content = @Content(schema = @Schema(type = "string", example = "알 수 없는 오류발생 다시 시도해주세요.")))
+    })
     //찐 비밀번호 재설정
     @PostMapping("/password/reset")
     public ResponseEntity<?> resetPassword(@RequestBody PasswordRequestDto requestDto){
