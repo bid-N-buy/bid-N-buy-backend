@@ -150,6 +150,7 @@ public class   UserController {
             response.sendRedirect(errorRedirectUrl);
         }
     }
+
     @Operation(summary = "네이버 로그인", description = "네이버 인증 후 리다이렉트" , tags = {"유저 API"})
     @GetMapping("/naver/loginstart")
     public RedirectView redirectToNaver(HttpSession session){
@@ -197,6 +198,14 @@ public class   UserController {
         }
     }
 
+    @Operation(summary = "임시 비밀번호 요청", description = "이메일로 임시 비밀번호 발급, 발송 요청", tags = {"유저 API"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "임시 비밀번호 발송 성공"),
+            @ApiResponse(responseCode = "404",description = "사용자를 찾을 수 없음",
+                    content = @Content(schema = @Schema(type = "string", example = "사용자를 찾을 수 없음"))),
+            @ApiResponse(responseCode = "500",description = "임시 비밀번호 생성 실패, 이메일 발송 오류",
+                    content = @Content(schema = @Schema(type = "string", example = "임시 비밀번호 생성 실패, 이메일 발송 오류"))),
+    })
     @PostMapping("/password/request")
     public ResponseEntity<?> requestPasswordReset(@RequestBody PasswordResetRequestDto request){
         UserEntity user = userService.findByEmail(request.getEmail())
