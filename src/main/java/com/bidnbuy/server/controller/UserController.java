@@ -266,6 +266,17 @@ public class   UserController {
         }
     }
 
+
+    @Operation(summary = "마이페이지 비밀번호 변경", description = "현재 비밀번호 확인 후 새 비밀번호로 변경합니다.", tags = {"유저 API"})
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",description = "비밀번호 변경 성공",
+            content = @Content(schema = @Schema(type = "string", example = "비밀번호가 성공적으로 변경되었습니다."))),
+        @ApiResponse(responseCode = "401",description = "인증 실패 (현재 비밀번호 불일치)"),
+        @ApiResponse(responseCode = "404",description = "사용자 정보를 찾을 수 없음",
+            content = @Content(schema = @Schema(type = "string", example = "사용자 정보를 찾을 수 없습니다."))),
+        @ApiResponse(responseCode = "500",description = "서버 오류")
+    })
     //마이페이지에서 비밀번호 재설정
     @PostMapping("/user/password/change")
     public ResponseEntity<?> changePassword(@RequestBody PasswordChangeRequestDto requestDto){
