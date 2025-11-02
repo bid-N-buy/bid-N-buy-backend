@@ -32,7 +32,7 @@ public class OrderController {
     @Operation(summary = "별점 생성", description = "주문에 대한 별점 생성 사용되는 API")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "별점 등록 성공",
-                    content = @Content(schema = @Schema(type = "string", example = "별점이 등록되었습니다."))),
+                    content = @Content(schema = @Schema(type = "string", implementation = RatingRequest.class))),
             @ApiResponse(responseCode = "401", description = "인증 실패"),
             @ApiResponse(responseCode = "404", description = "주문 정보를 찾을 수 없음") // 예외적으로 추가 고려
     })
