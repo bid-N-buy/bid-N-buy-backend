@@ -404,6 +404,15 @@ public class   UserController {
     }
 
     //로그아웃
+    @Operation(summary = "로그아웃", description = "사용자의 인증 정보(세션/토큰)를 무효화하고 로그아웃 처리")
+    @ApiResponses(value = {
+            // 실제 코드가 200 OK, Body 없음이므로 200으로 변경하고 content를 생략합니다.
+            @ApiResponse(responseCode = "200", description = "로그아웃 성공"),
+
+            // 401 응답은 인증 정보가 잘못되었거나 없는 경우를 나타냅니다.
+            @ApiResponse(responseCode = "401", description = "인증 실패 (유효하지 않거나 누락된 토큰)",
+                    content = @Content(schema = @Schema(implementation = ResponseDto.class, example = "유효하지 않은 인증 정보입니다.")))
+    })
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(Authentication authentication){
         Object principal = authentication.getPrincipal();
