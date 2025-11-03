@@ -58,6 +58,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         ) {
             return true;
         }
+        // 퍼블릭 GET API 스킵
+        if (HttpMethod.GET.matches(request.getMethod())) {
+            if (path.equals("/auctions") || path.startsWith("/auctions/")) {
+                return true;
+            }
+            if (path.equals("/category") || path.startsWith("/category/")) {
+                return true;
+            }
+        }
+
         // 공개 리소스 스킵
         if (path.equals("/favicon.ico") || path.startsWith("/chat_test") || path.startsWith("/ws/bid")) {
             return true;
@@ -113,7 +123,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         }catch (Exception e){
-            log.error("Security Context에 사용자 인증 정보를 설정할 수 없음", e);
+            // 퍼블릭 GET에서는 조용히 무시
+            if (isPublicGet(request)) {
+                log.debug("Invalid/failed token on public GET, continuing: {}", e.getMessage());
+            } else {
+                log.error("Security Context에 사용자 인증 정보를 설정할 수 없음", e);
+            }
         }
         filterChain.doFilter(request, response);
     }
@@ -122,13 +137,31 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private String parseBearerToken(HttpServletRequest request){
         String bearerToken = request.getHeader("Authorization");
         log.info("%%%%%%%%%%%%%%5Authorization Header: {}", bearerToken);
-        if(!StringUtils.hasText(bearerToken)){
+        if (bearerToken == null) {
             return null;
         }
-        if(!bearerToken.startsWith("Bearer ")){
+        bearerToken = bearerToken.trim();
+        if (bearerToken.isEmpty() || "null".equalsIgnoreCase(bearerToken) || "undefined".equalsIgnoreCase(bearerToken)) {
             return null;
         }
-        String token = bearerToken.substring(7);
-        return StringUtils.hasText(token) ? token : null;
+        if (!bearerToken.regionMatches(true, 0, "Bearer ", 0, 7)) {
+            return null;
+        }
+        String token = bearerToken.substring(7).trim();
+        if (token.isEmpty() || "null".equalsIgnoreCase(token) || "undefined".equalsIgnoreCase(token)) {
+            return null;
+        }
+        return token;
+    }
+
+    private boolean isPublicGet(HttpServletRequest request) {
+        if (!HttpMethod.GET.matches(request.getMethod())) {
+            return false;
+        }
+        String contextPath = request.getContextPath();
+        String path = request.getRequestURI().substring(contextPath.length());
+        return path.equals("/auctions") || path.startsWith("/auctions/")
+                || path.equals("/category") || path.startsWith("/category/")
+                || path.equals("/category/top");
     }
 }
