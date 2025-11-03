@@ -80,9 +80,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                         // 비로그인 조회 허용
-                        .requestMatchers(HttpMethod.GET, "/category/top").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/category/children/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/auctions/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/category/**").permitAll()
 
                         .requestMatchers("/auth/signup", "/auth/login", "/auth/kakao", "/favicon.ico", "/auth/naver", "/auth/reissue"
                                 , "/auth/naver/loginstart", "/auth/email/**", "/auth/password/**", "/chat_test.html**", "/ws/bid/**", "/images/**").permitAll()
