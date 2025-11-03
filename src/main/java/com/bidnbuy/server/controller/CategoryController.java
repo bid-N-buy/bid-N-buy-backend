@@ -35,8 +35,17 @@ public class CategoryController {
             @ApiResponse(responseCode = "401", description = "인증 실패")
     })
     @GetMapping("/top")
-    public ResponseEntity<?> topLevelCategory() {
+    public ResponseEntity<?> topLevelCategory(jakarta.servlet.http.HttpServletRequest request) {
         try {
+            // 임시 디버그 로그(ip 관련 헤더 확인)
+            String xff = request.getHeader("X-Forwarded-For");
+            String cfcIp = request.getHeader("CF-Connecting-IP");
+            String cfViewerAddr = request.getHeader("CloudFront-Viewer-Address");
+            String xRealIp = request.getHeader("X-Real-IP");
+            String remoteAddr = request.getRemoteAddr();
+            log.info("[IP-Debug] X-Forwarded-For={}, CF-Connecting-IP={}, CloudFront-Viewer-Address={}, X-Real-IP={}, remoteAddr={}",
+                    xff, cfcIp, cfViewerAddr, xRealIp, remoteAddr);
+
             List<CategoryDto> top = categoryService.findAllCategoryType();
 
             return ResponseEntity.ok(top);
