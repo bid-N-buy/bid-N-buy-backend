@@ -15,9 +15,14 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException) throws IOException{
-//        log.error("################>>> Unauthorized at {}: {}", request.getRequestURI(), authException.getMessage(), authException);
 
-//        log.error("인증되지 않은 사용자 접근(unauthorized):{}", authException.getMessage());
+        String path = request.getRequestURI();
+        if (path.startsWith("/auth/kakao") || path.startsWith("/api/auth/kakao")
+                || path.startsWith("/auth/naver") || path.startsWith("/api/auth/naver")) {
+            log.info("소셜 로그인 경로이므로 Unauthorized 무시: {}", path);
+            response.setStatus(HttpServletResponse.SC_OK);
+            return;
+        }
 
         response.setContentType("application/json;charset=UTF-8");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
