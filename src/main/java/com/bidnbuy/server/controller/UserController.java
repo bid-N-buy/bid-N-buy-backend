@@ -46,6 +46,12 @@ public class   UserController {
     @Value("${front.redirect.uri}")
     private String frontUri;
 
+    @Value("${kakao.client.id}")
+    private String clientId;
+
+    @Value("${kakao.redirect.uri}")
+    private String redirectUrl;
+
     private final UserService userService;
     private final AuthService authService;
     private final JwtProvider jwtProvider;
@@ -156,6 +162,17 @@ public class   UserController {
             response.sendRedirect(errorRedirectUrl);
         }
     }
+
+    @GetMapping("/auth/kakao/loginstart")
+    public RedirectView redirectToKakao() {
+        String kakaoAuthUrl = "https://kauth.kakao.com/oauth/authorize" +
+                "?client_id=" + clientId +
+                "&redirect_uri=" + redirectUri +
+                "&response_type=code";
+        log.info("카카오 로그인 리다이렉트: {}", kakaoAuthUrl);
+        return new RedirectView(kakaoAuthUrl);
+    }
+
 
     @Operation(summary = "네이버 로그인", description = "네이버 인증 후 리다이렉트" , tags = {"유저 API"})
     @GetMapping("/naver/loginstart")
