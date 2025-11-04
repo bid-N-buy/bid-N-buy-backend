@@ -40,7 +40,7 @@ import java.util.List;
 @Tag(name = "유저 API", description = "유저 기능 제공")
 @Slf4j
 @RestController
-@RequestMapping("/auth")
+@RequestMapping({"/auth", "/api/auth"})
 public class   UserController {
 
     @Value("${front.redirect.uri}")
