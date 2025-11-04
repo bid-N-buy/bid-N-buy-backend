@@ -1,5 +1,6 @@
 package com.bidnbuy.server.repository;
 
+import com.bidnbuy.server.entity.OrderEntity;
 import com.bidnbuy.server.entity.PaymentEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -14,4 +15,5 @@ public interface PaymentRepository extends JpaRepository<PaymentEntity, Long> {
 
     List<PaymentEntity> findByTossPaymentKeyAndTossPaymentKeyIsNotNull(String tossPaymentKey);
 
+    Optional<PaymentEntity> findByOrder(OrderEntity order);
 }

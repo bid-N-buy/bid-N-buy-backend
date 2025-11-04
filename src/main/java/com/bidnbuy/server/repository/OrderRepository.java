@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 
 public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
@@ -29,4 +30,6 @@ public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
     @Query("SELECT AVG(o.rating) FROM OrderEntity o WHERE o.seller.userId = :sellerId AND o.rating > 0")
     Double getAverageRatingBySeller(@Param("sellerId") Long sellerId);
 
+    // 중복체크
+    Optional<OrderEntity> findFirstByBuyer_UserIdAndResult_Auction_AuctionId(Long buyerId, Long auctionId);
 }

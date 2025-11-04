@@ -72,4 +72,6 @@ public interface AuctionResultRepository extends JpaRepository<AuctionResultEnti
 """)
     List<AuctionSalesHistoryDto> findPurchaseHistoryByUserId(@Param("userId") Long userId, Pageable pageable);
 
+    // 중복 체크
+    Optional<AuctionResultEntity> findFirstByAuction_AuctionId(Long auctionId);
 }

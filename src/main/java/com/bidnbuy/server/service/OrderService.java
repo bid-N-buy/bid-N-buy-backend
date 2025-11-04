@@ -27,6 +27,7 @@ public class OrderService {
     private final ChatMessageService chatMessageService;
     private final ChatRoomRepository chatRoomRepository;
     private final AuctionProductsRepository auctionProductsRepository;
+
     // 볍점 부여
     @Transactional
     public void rateOrder(Long orderId, Long buyerId, int rating) {
@@ -246,7 +247,23 @@ public class OrderService {
         AuctionProductsEntity auction = auctionProductsRepository.findById(dto.getAuctionId())
                 .orElseThrow(() -> new IllegalArgumentException("Auction not found: " + dto.getAuctionId()));
 
+        // 1. 이미 같은 경매/구매자 조합의 주문이 존재하는지 확인
+        OrderEntity existing = orderRepository
+                .findFirstByBuyer_UserIdAndResult_Auction_AuctionId(dto.getBuyerId(), dto.getAuctionId())
+                .orElse(null);
 
+        if (existing != null) {
+            log.info("⚠️ 기존 주문 존재 → orderId={} 그대로 반환", existing.getOrderId());
+            return OrderResponseDto.builder()
+                    .orderId(existing.getOrderId())
+                    .sellerId(existing.getSeller().getUserId())
+                    .buyerId(existing.getBuyer().getUserId())
+                    .type(existing.getType())
+                    .orderStatus(existing.getOrderStatus())
+                    .createdAt(existing.getCreatedAt())
+                    .updatedAt(existing.getUpdatedAt())
+                    .build();
+        }
 
         OrderEntity order = new OrderEntity();
         order.setSeller(seller);
@@ -257,7 +274,12 @@ public class OrderService {
         order.setCreatedAt(LocalDateTime.now());
         order.setUpdatedAt(LocalDateTime.now());
 
-        // ⭐ result 직접 생성
+        // 2. 기존 auction에 대한 result 존재 여부 체크
+        AuctionResultEntity existingResult = auctionResultRepository
+                .findFirstByAuction_AuctionId(dto.getAuctionId())
+                .orElse(null);
+
+        // result 직접 생성
         AuctionResultEntity result = AuctionResultEntity.builder()
                 .auction(auction)
                 .winner(buyer) // 구매자 == 낙찰자
@@ -271,18 +293,12 @@ public class OrderService {
         order.setResult(result);
 
 
-
         // 저장
         OrderEntity saved = orderRepository.save(order);
+
+        // 중복위험
         auctionResultRepository.save(result);
 
-        // resultId 저장
-//        AuctionResultEntity result = auctionResultRepository
-//                .findFirstByWinner_UserIdAndOrderIsNullOrderByClosedAtDesc(dto.getBuyerId())
-//                .orElseThrow(() -> new IllegalArgumentException("유효한 경매 결과가 없습니다."));
-//
-//        order.setResult(result);
-//        result.setOrder(order);
 
         return OrderResponseDto.builder()
                 .orderId(saved.getOrderId())

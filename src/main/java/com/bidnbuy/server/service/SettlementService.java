@@ -80,10 +80,9 @@ public class SettlementService {
 
         String autoMessage = String.format(
                 //자동 메세지 고정 내용
-                "결제가 완료되었습니다. 주문번호 : %d 거래가 성공적으로 마무리되었습니다.", orderId
+                "정산이 완료되었습니다. 주문번호 : %d 거래가 성공적으로 마무리되었습니다.", orderId
         );
         chatMessageService.sendAutoMessage(chatroomId, autoMessage);
-        System.out.println("????????" + chatroomId);
     }
 
     @Transactional

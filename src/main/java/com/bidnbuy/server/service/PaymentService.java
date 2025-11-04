@@ -144,10 +144,22 @@ public class PaymentService {
      */
     @Transactional
     public PaymentEntity createPendingPayment(OrderEntity order, SaveAmountRequest request) {
-        // 이미 merchantOrderId 가 존재하면 그대로 리턴
-        Optional<PaymentEntity> existing = paymentRepository.findByMerchantOrderId(request.getMerchantOrderId());
-        if (existing.isPresent()) {
-            return existing.get();
+        //order 기준으로 Payment가 이미 존재하는지 확인
+        Optional<PaymentEntity> existingPayment = paymentRepository.findByOrder(order);
+
+        if (existingPayment.isPresent()) {
+            PaymentEntity payment = existingPayment.get();
+            // 아직 결제 대기(PENDING)거나 실패(FAIL)인 경우에만 갱신
+            if (payment.getTossPaymentStatus() == paymentStatus.PaymentStatus.PENDING ||
+                    payment.getTossPaymentStatus() == paymentStatus.PaymentStatus.FAIL) {
+
+                payment.setTossPaymentStatus(paymentStatus.PaymentStatus.PENDING);
+                payment.setMerchantOrderId(request.getMerchantOrderId());
+                payment.setTotalAmount(request.getAmount());
+                payment.setRequestedAt(LocalDateTime.now());
+                return paymentRepository.save(payment);
+            }
+            return payment; // 아직 진행 중(PENDING)이라면 그대로 사용
         }
 
         // 없으면 새로 생성
