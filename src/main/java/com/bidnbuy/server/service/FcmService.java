@@ -32,12 +32,8 @@ public class FcmService {
             try {
                 Message message = Message.builder()
                         .setToken(token.getToken())
-                        .setNotification(
-                                Notification.builder()
-                                        .setTitle(title)
-                                        .setBody(body)
-                                        .build()
-                        )
+                        .putData("title", title)
+                        .putData("body", body)
                         .putData("type", type)
                         .putData("notificationId", String.valueOf(notiId))
                         .putData("createdAt", createdAt.toString())
@@ -56,6 +52,48 @@ public class FcmService {
                         e.getMessagingErrorCode() == MessagingErrorCode.UNREGISTERED) {
                     userTokenRepository.delete(token);
                     log.warn("🗑️ 잘못된 토큰 삭제됨: {}", token.getToken());
+                }
+            }
+        }
+    }
+
+    public void createChatSendNotification(Long userId, String title, String body, String type, Long notiId, LocalDateTime createdAt, Long auctionId,
+                                           Long sellerId) {
+        // 유저의 토큰 조회
+        List<UserFcmTokenEntity> tokens = userTokenRepository.findByUser_UserId(userId);
+
+        if (tokens.isEmpty()) {
+            log.warn("⚠️ [FCM] userId={} 토큰 없음 → 푸시 전송 건너뜀", userId);
+            return;
+        }
+
+        // 토큰별로 FCM 전송
+        for (UserFcmTokenEntity token : tokens) {
+            try {
+                Message.Builder builder = Message.builder()
+                        .setToken(token.getToken())
+                        .putData("title", title)
+                        .putData("body", body)
+                        .putData("type", type)
+                        .putData("notificationId", String.valueOf(notiId))
+                        .putData("createdAt", createdAt.toString());
+
+                // ✅ auctionId, sellerId 직접 추가
+                if (auctionId != null)
+                    builder.putData("auctionId", String.valueOf(auctionId));
+                if (sellerId != null)
+                    builder.putData("sellerId", String.valueOf(sellerId));
+
+                String response = FirebaseMessaging.getInstance().send(builder.build());
+                log.info("✅ [FCM] 푸시 전송 성공 (userId={}, token={}, response={})",
+                        userId, token.getToken(), response);
+
+            } catch (FirebaseMessagingException e) {
+
+                // 잘못된 토큰 정리
+                if (e.getMessagingErrorCode() == MessagingErrorCode.INVALID_ARGUMENT ||
+                        e.getMessagingErrorCode() == MessagingErrorCode.UNREGISTERED) {
+                    userTokenRepository.delete(token);
                 }
             }
         }

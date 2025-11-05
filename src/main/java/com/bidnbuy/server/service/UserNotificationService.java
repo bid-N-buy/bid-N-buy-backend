@@ -77,48 +77,51 @@ public class UserNotificationService {
         }
     }
 
-    /**
-     * 특수 알림 생성 (이력 저장 + 클릭시 채팅방 생성)
-     */
+
+//   /**
+//     * 특수 알림 생성 (이력 저장 + 클릭시 채팅방 생성)
+//     */
 //    @Transactional
-//    public void createNotification(Long userId, NotificationType type, String content, Long auctionId, Long sellerId) {
-//
-//        // 1. 유저 확인
-//        UserEntity user = userRepository.findById(userId)
-//                .orElseThrow(() -> new RuntimeException("User not found"));
-//
-//        // 2. DB 저장
-//        NotificationEntity noti = NotificationEntity.builder()
-//                .user(user)
-//                .type(type)
-//                .content(content)
-//                .isRead(false)
-//                .createdAt(LocalDateTime.now())
-//                .build();
-//
-//        NotificationEntity saved = notificationRepository.save(noti);
-//
-//        // 3. FCM 전송 (토큰 없거나 실패해도 DB는 남음)
-//        String title = "🏆 경매 낙찰 알림";
-//
-//        try {
-//            Map<String, String> data = new java.util.HashMap<>();
-//            if (auctionId != null) data.put("auctionId", auctionId.toString());
-//            if (sellerId != null) data.put("sellerId", sellerId.toString());
-//
-//            fcmService.sendNotification(
-//                    userId,
-//                    title,
-//                    content,
-//                    type.name(),                // "AUCTION_RESULT" 전달
-//                    saved.getNotificationId(),
-//                    saved.getCreatedAt(),
-//                    data
-//            );
-//        } catch (Exception e) {
-//            log.warn("⚠️ FCM 특수 알림 전송 실패 (DB 저장은 완료됨): {}", e.getMessage());
-//        }
-//    }
+    public void createNotificationforChat(Long userId, NotificationType type, String content, Long auctionId, Long sellerId) {
+
+        // 1. 유저 확인
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // 2. DB 저장
+        NotificationEntity noti = NotificationEntity.builder()
+                .user(user)
+                .type(type)
+                .content(content)
+                .isRead(false)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        NotificationEntity saved = notificationRepository.save(noti);
+
+        // 3. FCM 전송 (토큰 없거나 실패해도 DB는 남음)
+        String title = "🏆 경매 낙찰 알림";
+
+        try {
+
+            fcmService.createChatSendNotification(
+                    userId,
+                    title,
+                    content,
+                    type.name(),                // "AUCTION_RESULT" 전달
+                    saved.getNotificationId(),
+                    saved.getCreatedAt(),
+                    auctionId,
+                    sellerId
+            );
+
+            // ✅ 성공 로그 추가
+            log.info("✅ FCM 특수 알림 전송 완료: userId={}, auctionId={}, sellerId={}, type={}, seller =  {}",
+                    userId, auctionId, sellerId, type, sellerId);
+        } catch (Exception e) {
+            log.warn("⚠️ FCM 특수 알림 전송 실패 (DB 저장은 완료됨): {}", e.getMessage());
+        }
+    }
 
     // ✅ 소프트 삭제 (개별)
     @Transactional
@@ -193,7 +196,6 @@ public class UserNotificationService {
         NotificationEntity saved = notificationRepository.save(noti);
         return saved;
     }
-
 
 
 }
