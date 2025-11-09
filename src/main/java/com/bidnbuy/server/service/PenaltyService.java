@@ -27,7 +27,8 @@ public class PenaltyService {
     public void applyPenalty(Long userId, PenaltyType type) {
         log.info("페널티 부과 시작: userId={}, type={}", userId, type);
 
-        UserEntity user = userRepository.findById(userId)
+        // 동시성 제어 위해 비관적 락 사용
+        UserEntity user = userRepository.findByIdWithLock(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: " + userId));
 
         // 페널티 기록
