@@ -151,13 +151,17 @@ public class AdminInquiriesService {
         inquiriesRepository.save(inquiry);
         log.info("문의 답변 작성 완료: inquiryId={}, adminId={}, 상태=COMPLETE", inquiryId, adminId);
 
-        // 문의 작성자에게 알림 발송
+        // 문의 작성자에게 알림 발송 (탈퇴 회원인 경우x)
         try {
-            String content = "문의하신 내용에 대한 답변이 등록되었습니다.";
-            userNotificationService.createNotification(inquiry.getUser().getUserId(), NotificationType.NOTICE, content);
-            log.info("✅ 문의 답변 알림 전송 완료: userId={}, inquiryId={}", inquiry.getUser().getUserId(), inquiryId);
+            if (inquiry.getUser() != null) {
+                String content = "문의하신 내용에 대한 답변이 등록되었습니다.";
+                userNotificationService.createNotification(inquiry.getUser().getUserId(), NotificationType.NOTICE, content);
+                log.info("문의 답변 알림 전송 완료: userId={}, inquiryId={}", inquiry.getUser().getUserId(), inquiryId);
+            } else {
+                log.warn("문의 답변 알림 전송 건너뜀: 탈퇴 회원 (inquiryId={})", inquiryId);
+            }
         } catch (Exception e) {
-            log.warn("⚠️ 문의 답변 알림 전송 실패: {}", e.getMessage());
+            log.warn("문의 답변 알림 전송 실패: {}", e.getMessage());
         }
     }
 
