@@ -1,7 +1,9 @@
 package com.bidnbuy.server.repository;
 
 import com.bidnbuy.server.entity.UserEntity;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
@@ -37,4 +39,9 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     // 정지 해제된 사용자 조회
     @Query("SELECT u FROM UserEntity u WHERE u.isSuspended = true AND u.suspendedUntil < CURRENT_TIMESTAMP")
     List<UserEntity> findExpiredSuspensions();
+    
+    // 락 메서드 - 페널티 부과 관련 동시성 제어 위해
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT u FROM UserEntity u WHERE u.userId = :userId")
+    Optional<UserEntity> findByIdWithLock(Long userId);
 }
