@@ -35,16 +35,19 @@ public class WishlistService {
     @Transactional
     public WishlistDto like(Long userId, Long auctionId) {
 
-        // 1. 유저 존재하는지 확인
+        // 유저 존재하는지 확인
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("해당 유저 ID가 없습니다"));
 
-        // 2. 해당 경매 물품이 있는지 확인
+        // 해당 경매 물품이 있는지 확인
         AuctionProductsEntity auction = auctionProductsRepository.findById(auctionId)
                 .orElseThrow(() -> new RuntimeException("해당 경매 물품 ID가 없습니다"));
 
-        // 자기 자신이 등록한 물 찜하기 금지
-        if(auction.getUser().getUserId() == userId.longValue()) {
+        // 판매자 유저 존재 여부 확인 후 본인 체크
+        UserEntity seller = auction.getUser();
+
+        // 판매자 유저가 있고(널 체크), 본인이 등록한 물품이면 찜 금지
+        if(seller != null && seller.getUserId().longValue() == userId.longValue()) {
             throw new RuntimeException("자신이 등록한 경매 물품은 찜 할 수 없습니다.");
         }
 
