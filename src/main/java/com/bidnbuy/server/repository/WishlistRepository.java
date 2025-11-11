@@ -23,7 +23,7 @@ public interface WishlistRepository extends JpaRepository<WishlistEntity, Long> 
 
     long countByAuction_AuctionId(Long auctionId);
 
-    @Query("SELECT w FROM WishlistEntity w JOIN FETCH w.auction a JOIN FETCH a.images i WHERE w.user = :user")
+    @Query("SELECT w FROM WishlistEntity w JOIN FETCH w.auction a WHERE a.deletedAt IS NULL AND w.user = :user")
     List<WishlistEntity> findByUserWithAuctionAndImages(UserEntity user);
 
     boolean existsByUser_UserIdAndAuction_AuctionId(Long userId, Long auctionId);

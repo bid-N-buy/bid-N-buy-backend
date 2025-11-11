@@ -18,11 +18,11 @@ public interface AuctionResultRepository extends JpaRepository<AuctionResultEnti
     Optional<AuctionResultEntity> findByAuction_AuctionId(Long auctionId);
 
     // 특정 사용자가 낙찰받은 상품의 모든 결과
-    @Query("SELECT r FROM AuctionResultEntity r JOIN FETCH r.auction a WHERE r.winner.userId = :userId")
+    @Query("SELECT DISTINCT r FROM AuctionResultEntity r JOIN FETCH r.auction a WHERE r.winner.userId = :userId")
     List<AuctionResultEntity> findByWinner_UserId_Optimized(@Param("userId") Long userId);
 
     // 특정 사용자가 판매한 경매 상품의 모든 최종 결과를 조회
-    @Query("SELECT r FROM AuctionResultEntity r JOIN FETCH r.auction a JOIN FETCH a.user u WHERE u.userId = :userId")
+    @Query("SELECT DISTINCT r FROM AuctionResultEntity r JOIN FETCH r.auction a JOIN FETCH a.user u WHERE u.userId = :userId AND a.deletedAt IS NULL")
     List<AuctionResultEntity> findByAuction_User_UserId_Optimized(@Param("userId") Long userId);
 
     List<AuctionResultEntity> findByOrder_OrderId(Long orderId);
@@ -45,12 +45,12 @@ public interface AuctionResultRepository extends JpaRepository<AuctionResultEnti
 
     // 결재완료 시간 순서
     @Query("""
-            SELECT r FROM AuctionResultEntity r
-            JOIN r.order o
-            WHERE r.winner.userId = :userId
-            AND o.orderStatus = 'PAID'
-            ORDER BY o.updatedAt DESC
-            """)
+        SELECT DISTINCT r FROM AuctionResultEntity r
+        JOIN r.order o
+        WHERE r.winner.userId = :userId
+        AND o.orderStatus = 'PAID'
+        ORDER BY o.updatedAt DESC
+        """)
     List<AuctionResultEntity> findTop3ByWinnerOrderByOrderUpdatedAtDesc(@Param("userId") Long userId);
 
     @Query("""

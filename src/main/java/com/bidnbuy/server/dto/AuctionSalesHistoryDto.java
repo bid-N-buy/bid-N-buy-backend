@@ -2,11 +2,12 @@ package com.bidnbuy.server.dto;
 
 import lombok.Builder;
 import lombok.Getter;
-
+import lombok.EqualsAndHashCode;
 import java.time.LocalDateTime;
 
 @Getter
 @Builder
+@EqualsAndHashCode(of = {"auctionId"})
 public class AuctionSalesHistoryDto {
     private Long auctionId;
     private String title;

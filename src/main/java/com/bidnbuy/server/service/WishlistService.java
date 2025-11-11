@@ -3,10 +3,8 @@ package com.bidnbuy.server.service;
 import com.bidnbuy.server.dto.WishlistDto;
 import com.bidnbuy.server.dto.WishlistResponseDto;
 import com.bidnbuy.server.entity.AuctionProductsEntity;
-import com.bidnbuy.server.entity.ImageEntity;
 import com.bidnbuy.server.entity.UserEntity;
 import com.bidnbuy.server.entity.WishlistEntity;
-import com.bidnbuy.server.enums.ImageType;
 import com.bidnbuy.server.enums.IsDeletedStatus;
 import com.bidnbuy.server.enums.SellingStatus;
 import com.bidnbuy.server.enums.WishlistFilterStatus;
@@ -89,11 +87,11 @@ public class WishlistService {
     @Transactional(readOnly = true)
     public List<WishlistResponseDto> getWishlist(Long userId, WishlistFilterStatus filterStatus) {
 
-        // 1. 유저 존재하는지 확인
+        // 1. 유저 존재하는지 확인 (기존 로직 유지)
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("해당 유저 ID가 없습니다"));
 
-        // 2. 해당 경매 물품이 있는지 확인
+        // 2. 해당 경매 물품이 있는지 확인 (기존 로직 유지)
         List<WishlistEntity> list =  wishlistRepository.findByUserWithAuctionAndImages(user);
 
         return list.stream()
@@ -106,24 +104,26 @@ public class WishlistService {
                         return true;
                     }
 
-                    SellingStatus currentStatus;
+                    // ✨ [핵심 수정] 1. 상태 문자열을 기반으로 그룹을 판단합니다.
+                    // 이 부분이 기존의 Enum 변환/오류 로직을 대체합니다.
 
-                    try{
-                        currentStatus = SellingStatus.valueOf(currentStatusString);
-                    }catch (IllegalArgumentException e) {
-                        return false;
-                    }
+                    // 진행 중 그룹: "경매 진행 중" 또는 "경매 시작전"
+                    boolean isProgressGroup = "진행중".equals(currentStatusString)
+                            || "시작전".equals(currentStatusString);
 
-                    boolean isFinished = currentStatus == SellingStatus.FINISH
-                            || currentStatus == SellingStatus.COMPLETED;
+                    // 종료 그룹: "경매 종료", "판매완료", "판매자 삭제완료"
+                    boolean isFinishedGroup = "종료".equals(currentStatusString)
+                            || "거래완료".equals(currentStatusString)
+                            || "판매자에 의해 삭제완료".equals(currentStatusString); // ✨ 라벨 통일 및 삭제 상태 포함
+
+                    // 2. 필터링 로직 (기존 의도 유지)
 
                     if (filterStatus == WishlistFilterStatus.FINISHED) {
-                        return isFinished;
+                        return isFinishedGroup; // 종료 그룹 상태인 경우 포함
                     }
 
                     if (filterStatus == WishlistFilterStatus.PROGRESS) {
-                        // 진행 중 상태 그룹핑: 종료 상태가 아닌 모든 상태 (BEFORE, SALE, PROGRESS 등)
-                        return !isFinished;
+                        return isProgressGroup; // 진행 중 그룹 상태인 경우 포함
                     }
 
                     return false;
@@ -131,10 +131,11 @@ public class WishlistService {
                 .map(wish -> {
                     AuctionProductsEntity product = wish.getAuction();
 
+                    // AuctionProductsService에서 최종 라벨을 가져옵니다.
+                    String sellingStatus = auctionProductsService.calculateSellingStatus(product);
+
                     String mainImageUrl = imageRepository.findFirstImageUrlByAuctionId(product.getAuctionId())
                             .orElse(null);
-
-                    String sellingStatus = auctionProductsService.calculateSellingStatus(product);
 
                     String sellerNicknameSafe = "탈퇴회원";
                     try {
