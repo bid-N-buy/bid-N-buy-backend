@@ -382,10 +382,14 @@ public class AdminAuthService {
 
         AdminEntity admin = storedToken.getAdmin();
 
+        // 데모 계정이랑 role 나누기
+        boolean isDemoViewer = isDemoAdminEmail(admin.getEmail());
+        String roleForToken = isDemoViewer ? "ADMIN_VIEWER" : "ADMIN";
+
         // 새 토큰 생성 (role 포함)
         Long adminId = admin.getAdminId();
-        String newAccessToken = jwtProvider.createAccessToken(adminId, "ADMIN");
-        String newRefreshToken = jwtProvider.createRefreshToken(adminId, "ADMIN");
+        String newAccessToken = jwtProvider.createAccessToken(adminId, roleForToken);
+        String newRefreshToken = jwtProvider.createRefreshToken(adminId, roleForToken);
         Instant newExpiryDate = jwtProvider.getRefreshTokenExpiryDate();
 
         // db에 새 토큰 갱신
