@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -110,7 +111,7 @@ public class AdminInquiriesController {
     @PostMapping("/{inquiryId}/reply")
     public ResponseEntity<?> replyToInquiry(
             @PathVariable Long inquiryId,
-            @RequestBody AdminInquiryReplyRequestDto request,
+            @Valid @RequestBody AdminInquiryReplyRequestDto request,
             Authentication authentication) {
         log.info("관리자 문의 답변 요청: inquiryId={}", inquiryId);
         
