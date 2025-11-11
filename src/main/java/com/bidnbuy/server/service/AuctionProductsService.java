@@ -408,6 +408,11 @@ public class AuctionProductsService {
 
     //  경매 상태 계산 메서드
     public String calculateSellingStatus(AuctionProductsEntity product) {
+
+        if (product.getDeletedAt() != null) {
+            return "판매자에 의해 삭제"; // SellingStatus.DELETED에 매핑되는 사용자 친화적 문자열
+        }
+
         return switch (product.getSellingStatus()) {
             case PROGRESS -> {
                 LocalDateTime now = LocalDateTime.now();
@@ -423,6 +428,7 @@ public class AuctionProductsService {
             case BEFORE -> "시작전";
             case COMPLETED -> "거래완료"; // 거래완료
             case FINISH -> "종료";
+            case DELETED -> "판매자에 의해 삭제";
         };
     }
 

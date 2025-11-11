@@ -23,7 +23,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -106,7 +108,7 @@ public class AuctionResultService {
 
     // 마이페이지 - 판매 내역(필터 적용)
     public List<AuctionSalesHistoryDto> getSalesHistory(Long userId, TradeFilterStatus filterStatus) {
-        List<AuctionSalesHistoryDto> salesHistory = new ArrayList<>();
+        Set<AuctionSalesHistoryDto> salesHistorySet = new HashSet<>();
 
         // 경매 진행 중 / 시작전 필터링
         if (filterStatus == TradeFilterStatus.ONGOING || filterStatus == TradeFilterStatus.ALL) {
@@ -125,7 +127,7 @@ public class AuctionResultService {
             if (filterStatus == TradeFilterStatus.ONGOING) {
                 return activeSales;
             }
-            salesHistory.addAll(activeSales);
+            salesHistorySet.addAll(activeSales);
         }
 
         // 2. 경매 종료 후 거래 상태 필터링 (ResultStatus 사용)
@@ -144,15 +146,15 @@ public class AuctionResultService {
                     .map(this::toSalesDto)
                     .collect(Collectors.toList());
 
-            salesHistory.addAll(completedSales);
+            salesHistorySet.addAll(completedSales);
         }
 
         // 3. 필터가 COMPLETED/CANCELLED인 경우 (1번 로직을 타지 않음)
         if (filterStatus == TradeFilterStatus.COMPLETED || filterStatus == TradeFilterStatus.CANCELLED) {
-            return salesHistory;
+            return new ArrayList<>(salesHistorySet);
         }
 
-        return salesHistory;
+        return new ArrayList<>(salesHistorySet);
     }
 
     // 구매 내역

@@ -20,7 +20,8 @@ public class WishlistResponseDto {
 
     // 3. 판매자 정보
     private String sellerNickname;
-
-    // 4. 상태 정보
     private String sellingStatus;
+
+    private boolean isDeleted; // 물품 삭제 여부
+    private String deleteMessage; // 삭제 메시지 (예: "경매 물품이 삭제되었습니다")
 }

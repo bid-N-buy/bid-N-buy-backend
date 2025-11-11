@@ -6,5 +6,6 @@ public enum SellingStatus {
     SALE,           // 판매 중
     COMPLETED,      // 경매 완료
     PROGRESS,       // 경매 중
-    FINISH;         // 경매 완료
+    FINISH,         // 경매 완료
+    DELETED;        // 판매자의 삭제
 }
