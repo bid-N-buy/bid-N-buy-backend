@@ -353,9 +353,11 @@ public class AuctionProductsService {
             case "BEFORE":
                 return "시작전";
             case "COMPLETED":
-                return "거래완료";
+                return "완료";
             case "FINISH":
                 return "종료";
+            case "DELETED":
+                return "판매자의 의해 삭제";
             default:
                 return "진행중";
         }
@@ -426,7 +428,7 @@ public class AuctionProductsService {
             }
             case SALE -> "진행중";
             case BEFORE -> "시작전";
-            case COMPLETED -> "거래완료"; // 거래완료
+            case COMPLETED -> "완료"; // 거래완료
             case FINISH -> "종료";
             case DELETED -> "판매자에 의해 삭제";
         };
