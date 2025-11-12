@@ -412,7 +412,7 @@ public class AuctionProductsService {
     public String calculateSellingStatus(AuctionProductsEntity product) {
 
         if (product.getDeletedAt() != null) {
-            return "판매자에 의해 삭제"; // SellingStatus.DELETED에 매핑되는 사용자 친화적 문자열
+            return "판매자에 의해 삭제"; // SellingStatus.DELETED에 매핑되는 문자열
         }
 
         return switch (product.getSellingStatus()) {
