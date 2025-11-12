@@ -436,7 +436,13 @@ public class   UserController {
         return ResponseEntity.ok(profile);
     }
 
-    // 다른 유저 구매내역 확인
+    // 다른 유저 프로필 구매내역 확인
+    @Operation(summary = "다른 프로필 유저 구매내역 조회 API", description = "다른 유저 프로필 구매내역 조회")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "조회 성공",
+                    content = @Content(schema = @Schema(implementation = UserProfileSummaryDto.class))),
+            @ApiResponse(responseCode = "401", description = "인증 실패")
+    })
     @GetMapping("/users/{userId}/purchases")
     public ResponseEntity<List<AuctionSalesHistoryDto>> getUserPurchaseHistory(
             @AuthenticationPrincipal Long userId,
