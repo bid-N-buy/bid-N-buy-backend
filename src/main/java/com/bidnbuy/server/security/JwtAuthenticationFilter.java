@@ -57,6 +57,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 path.startsWith("/auth/password")
         ) {
             log.warn("### 필터 스킵 TRUE (Auth 공개): {}", path);
+            log.info("### [SKIP] shouldNotFilter() = true for path = {}", path);
             return true;
         }
         // 공개 리소스 스킵
@@ -68,7 +69,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException{
+        log.info("### [JWT FILTER START] URI = {}", request.getRequestURI());
+
         if (shouldNotFilter(request)) {
+
             filterChain.doFilter(request, response);
             return;
         }
@@ -83,6 +87,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 //유효한 토큰
                 if(StringUtils.hasText(userIdStr)){
                     Long userId = Long.valueOf(userIdStr);
+                    log.info("### [JWT VALID] userId extracted = {}", userId);
                     log.info("Authenticated user Id : {}", userId);
                     
                     // 역할 기반 권한 설정
@@ -110,6 +115,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 //                    authentication.setAuthenticated(true);
                     SecurityContextHolder.getContext().setAuthentication(authentication);
+                    log.info("### [AUTH SET] SecurityContext updated for userId={}, authorities={}",
+                            userId, authorities);
 
 //                    SecurityContext securityContext =  SecurityContextHolder.createEmptyContext();
 //                    securityContext.setAuthentication(authentication);
