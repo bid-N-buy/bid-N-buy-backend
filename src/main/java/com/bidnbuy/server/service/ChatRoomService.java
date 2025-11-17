@@ -102,7 +102,10 @@ public class ChatRoomService {
         String counterpartNicknameSafe = "탈퇴회원";
         String counterpartProfileImageUrlSafe = null;
         try {
-            if (counterpartUser != null) {
+            if (counterpartUser == null || counterpartUser.isDeleted()) {
+                counterpartNicknameSafe = "탈퇴회원";
+                counterpartProfileImageUrlSafe = null;
+            }else{
                 counterpartIdSafe = counterpartUser.getUserId();
                 counterpartNicknameSafe = counterpartUser.getNickname();
                 counterpartProfileImageUrlSafe = counterpartUser.getProfileImageUrl();
