@@ -100,22 +100,24 @@ public class ChatMessageService {
 
         UserEntity currentUser = userRepository.findById(currentUserId).orElse(null);
 
-        Long buyerId = chatRoom.getBuyerId() != null ? chatRoom.getBuyerId().getUserId():null;
-        Long sellerId = chatRoom.getSellerId() != null ? chatRoom.getSellerId().getUserId():null;
-
-        if(currentUserId.equals(buyerId)||currentUserId.equals(sellerId)){
-            if(currentUser != null){
-                markMessagesAsRead(chatRoom, currentUser);
-            }
-        }else{
+        if (!hasAccess(chatRoom, currentUserId)) {
             throw new AccessDeniedException("접근 권한이 없습니다.");
         }
 
-        List<ChatMessageEntity> messages = chatMessageRepository.findByChatroomIdOrderByCreateAt(chatRoom);
+        if (currentUser != null) {
+            markMessagesAsRead(chatRoom, currentUser);
+        }
 
-        return messages.stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
+        return chatMessageRepository.findByChatroomIdOrderByCreateAt(chatRoom).stream()
+            .map(this::convertToDto)
+            .collect(Collectors.toList());
+    }
+
+    //공통 권한 확인 로직  추가
+    private boolean hasAccess(ChatRoomEntity chatRoom, Long userId) {
+        Long buyerId = chatRoom.getBuyerId() != null ? chatRoom.getBuyerId().getUserId() : null;
+        Long sellerId = chatRoom.getSellerId() != null ? chatRoom.getSellerId().getUserId() : null;
+        return userId.equals(buyerId) || userId.equals(sellerId);
     }
 
     public ChatMessageDto convertToDto(ChatMessageEntity entity){
@@ -139,20 +141,15 @@ public class ChatMessageService {
         ChatRoomEntity chatRoom = chatRoomRepository.findById(chatroomId)
                 .orElseThrow(()-> new EntityNotFoundException("채팅방을 찾을 수 없음"));
 
+        if (!hasAccess(chatRoom, currentUserId)) {
+            throw new AccessDeniedException("접근 권한이 없습니다.");
+        }
         UserEntity reader = userRepository.findById(currentUserId).orElse(null);
 
-        Long buyerId = chatRoom.getBuyerId() != null? chatRoom.getBuyerId().getUserId():null;
-        Long sellerId = chatRoom.getSellerId() != null? chatRoom.getSellerId().getUserId():null;
-
-        if((buyerId != null && currentUserId.equals(buyerId))||
-            (sellerId != null && currentUserId.equals(sellerId))){
-            if(reader != null){
-                markMessagesAsRead(chatRoom, reader);
-            }else{
-                log.warn("탈퇴한 사용자{}가 채팅방 읽음 처리 시도, 작업 건너뛰기", currentUserId);
-            }
-        }else{
-            throw new AccessDeniedException("접근 권한이 없습니다.");
+        if (reader != null) {
+            markMessagesAsRead(chatRoom, reader);
+        } else {
+            log.warn("탈퇴한 사용자 {} 채팅방 읽음 처리 시도", currentUserId);
         }
     }
 
@@ -184,23 +181,18 @@ public class ChatMessageService {
         ChatRoomEntity chatRoom = chatRoomRepository.findById(chatroomId)
                 .orElseThrow(() -> new EntityNotFoundException("채팅방을 찾을 수 없습니다."));
 
+        if (!hasAccess(chatRoom, currentUserId)) {
+            throw new AccessDeniedException("접근 권한이 없습니다.");
+        }
+
         UserEntity currentUser = userRepository.findById(currentUserId).orElse(null);
 
-        //권한 확인
-        Long buyerId = chatRoom.getBuyerId() != null? chatRoom.getBuyerId().getUserId():null;
-        Long sellerId = chatRoom.getSellerId() != null? chatRoom.getSellerId().getUserId():null;
-
-        if((buyerId != null && currentUserId.equals(buyerId)) ||
-                (sellerId != null && currentUserId.equals(sellerId))){
-            if(currentUser == null){
-                return 0L;
-            }
+        if (currentUser == null) {
+            return 0L;
+        }
             return chatMessageRepository.countByChatroomIdAndSenderIdNotAndIsRead(
                     chatRoom,
                     currentUser,
                     false );
-        }else{
-            throw new AccessDeniedException("접근 권한이 없습니다.");
-        }
     }
 }

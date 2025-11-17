@@ -23,7 +23,7 @@ import java.util.List;
         @UniqueConstraint(name = "UC_EmailAndDeletedAt", columnNames = {"email", "deleted_at"}),
 })
 @SQLDelete(sql = "UPDATE user SET deleted_at = CURRENT_TIMESTAMP WHERE user_id = ?")
-@SQLRestriction("deleted_at IS NULL")
+//@SQLRestriction("deleted_at IS NULL")
 public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -126,4 +126,9 @@ public class UserEntity {
 
     @Column(name = "account_holder", length = 50)
     private String accountHolder;   // 예금주
+
+
+    public boolean isDeleted() {
+        return this.deletedAt != null;
+    }
 }
