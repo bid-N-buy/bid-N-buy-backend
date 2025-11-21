@@ -418,14 +418,18 @@ PW : admin123
 
 ### 마이 페이지
 
-<img src="./assets/mypage.gif" width="300" align="right">
-
 - 프로필 이미지, 닉네임, 비밀번호 변경 기능
 - 배송지 등록 기능 (Daum 우편번호 서비스)
 - 정산 계좌 정보 등록 기능
 - 구매 내역, 판매 내역 조회
 - 1:1 문의/신고 등록 및 조회
 - 회원 탈퇴 기능
+
+<br>
+
+<p align="center">
+  <img src="./assets/mypage.gif" width="400">
+</p>
 
 ### 관리자 기능
 
