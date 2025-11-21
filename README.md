@@ -415,13 +415,13 @@ PW : admin123
 
 - 관심 경매 찜하기 기능
 - 찜 목록 조회 및 필터링
-- 
-<details>
+- <details>
   <summary>GIF 보기</summary>
 
   <br>
   <img src="./assets/zimm.gif">
-</details>
+ </details>
+
 
 ### 마이 페이지
 
@@ -432,12 +432,12 @@ PW : admin123
 - 1:1 문의/신고 등록 및 조회
 - 회원 탈퇴 기능
 
-<br>
+<details>
+  <summary>GIF 보기</summary>
 
-<p align="left">
-  <img src="./assets/mypage.gif" width="400">
-</p>
-
+  <br>
+  <img src="./assets/zimm.gif">
+</details>
 ___
 
 ### 관리자 기능
