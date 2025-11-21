@@ -372,6 +372,14 @@ PW : admin123
 - JWT 기반 인증 시스템, Spring Security 활용 보안 처리
 - 관리자 IP 화이트리스트 기반 인증
 
+<details>
+    <summary>GIF 보기</summary>
+    <br>
+    <img src="./assets/login.gif">
+    <br>
+    <img src="./assets/signup.gif">
+</details>
+
 ### 경매
 
 - 키워드 검색 및 가격 범위, 상태 필터링
@@ -396,7 +404,11 @@ PW : admin123
 - 입찰 후 낙관적 업데이트 및 서버 데이터 동기화로 실시간 갱신
 - 낙찰 알림 및 경매 종료 알림
 
-
+<details>
+    <summary>GIF 보기</summary>
+    <br>
+    <img src="./assets/bid.gif">
+</details>
 
 ### 실시간 채팅
 
@@ -496,6 +508,12 @@ PW : admin123
 - 구매자 구매 확정 시 정산 완료 처리
 - 정산 상태 관리 (대기, 진행중, 완료)
 - 정산 내역 조회
+
+<details>
+    <summary>GIF 보기</summary>
+    <br>
+    <img src="./assets/settlement.gif">
+</details>
 
 <br>
 
