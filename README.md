@@ -431,6 +431,8 @@ PW : admin123
   <img src="./assets/mypage.gif" width="400">
 </p>
 
+***
+
 ### 관리자 기능
 
 - IP 화이트리스트 기반 관리자 인증
