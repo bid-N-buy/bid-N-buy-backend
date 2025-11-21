@@ -427,7 +427,7 @@ PW : admin123
 
 <br>
 
-<p align="center">
+<p align="left">
   <img src="./assets/mypage.gif" width="400">
 </p>
 
