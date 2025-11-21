@@ -1,23 +1,18 @@
 # Bid&Buy
 
-> **실시간 중고 경매 플랫폼**
+> **중고거래에 실시간 경매를 더한 서비스**
 
-<div align="center">
-
-<!-- 메인이미지(로고)(추후 추가) -->
-<!-- <img src="이미지URL" width="1000" /> -->
-
+<div align="center"><br>
+<img src="https://github.com/user-attachments/assets/59abd76a-c72a-47ce-88b5-4c9f929e7ce2" alt="Bid&Buy 로고" width="400" />
 </div><br>
 
 ## 🏷️ 프로젝트 소개
 
-기존의 중고거래 플랫폼은 대부분 고정가 방식으로 운영되고 있습니다. 이 방식은 직관적이고 간단하지만, 가격 경쟁을 통한 더 나은 조건을 얻기에는 한계가 있습니다. 반면 전문 경매 플랫폼은 접근성이 낮고, 일반
-사용자는 진입 장벽을 느끼는 경우가 많습니다.
+기존의 중고거래 플랫폼은 대부분 고정가 방식으로 운영되고 있습니다. 이 방식은 직관적이고 간단하지만, 가격 경쟁을 통한 더 나은 조건을 얻기에는 한계가 있습니다. 반면 전문 경매 플랫폼은 접근성이 낮고, 일반 사용자는 진입 장벽을 느끼는 경우가 많습니다.
 
-<strong>Bid&Buy는 이런 간극을 해소하기 위해 중고거래에 경매 방식을 결합한 서비스입니다.</strong> 누구나 부담 없이 참여할 수 있는 “일상 속 경매 경험”을 제공하고, 실시간 입찰·알림·채팅
-기능으로 역동적인 거래 분위기를 만듭니다. 또한 안전결제(에스크로) 시스템을 적용해 사용자가 보다 안심하고 이용할 수 있는 환경을 마련했습니다.
+<strong>Bid&Buy는 이런 간극을 해소하기 위해 중고거래에 경매 방식을 결합한 서비스입니다.</strong> 누구나 부담 없이 참여할 수 있는 “일상 속 경매 경험”을 제공하고, 실시간 입찰·알림·채팅 기능으로 역동적인 거래 분위기를 만듭니다. 또한 안전결제(에스크로) 시스템을 적용해 사용자가 보다 안심하고 이용할 수 있는 환경을 마련했습니다.
 
-Bid&Buy는 경매의 합리성과 거래의 안전함을 갖춘 차별화된 중고거래 플랫폼으로, 중고거래 시장에 효율적이고 신뢰감 있는 새로운 서비스를 제안합니다.
+Bid&Buy는 경매의 합리성과 거래의 안전함을 갖춘 차별화된 중고거래 서비스로, 중고거래 시장에 효율적이고 신뢰감 있는 새로운 서비스를 제안합니다.
 <br><br>
 
 ## 🗓️ 개발 기간
@@ -190,174 +185,57 @@ PW : admin123
 
 <br>
 
-[//]: # "## 📄 관련 문서"
-
-[//]: #
-
-[//]: # "<details>"
-
-[//]: #
-
-[//]: # "<summary><b>ERD</b></summary>"
-
-[//]: #
-
-[//]: # "<!-- ERD 링크 (추후 추가) -->"
-
-[//]: # "<!-- [ERD](링크) -->"
-
-[//]: #
-
-[//]: # "</details>"
-
-[//]: #
-
-[//]: # "<details>"
-
-[//]: #
-
-[//]: # "<summary><b>화면설계서(Figma)</b></summary>"
-
-[//]: #
-
-[//]: # "<!-- Figma 링크 (추후 추가) -->"
-
-[//]: # "<!-- [화면설계서(Figma)](링크) -->"
-
-[//]: #
-
-[//]: # "</details>"
-
-[//]: #
-
-[//]: # "<details>"
-
-[//]: #
-
-[//]: # "<summary><b>API 명세서 (Swagger)</b></summary>"
-
-[//]: #
-
-[//]: # "<!-- Swagger 링크 (추후 추가) -->"
-
-[//]: # '<!-- <img src="이미지URL" alt="API 명세서" width="900" /> -->'
-
-[//]: #
-
-[//]: # "</details>"
-
-[//]: #
-
-[//]: # "<br>"
-
 ## ✨ 주요 기능
 
-<table align="center" style="width: 100%; max-width: 1200px;">
-
-<tr>
-
-<td align="center" style="width: 100%; padding: 20px;">
-
-<strong>회원가입 및 로그인</strong><br>
-
-<!-- 이미지 (추후 추가 예정) -->
-<!-- <img src="이미지URL" alt="회원가입/로그인" width="370" /><br> -->
-
-<em>이메일 인증을 통한 안전한 회원가입과 JWT 기반 인증 시스템</em>
-
-</td>
-
-<td align="center" style="width: 100%; padding: 20px;">
-
-<strong>경매 상품 등록 및 조회</strong><br>
-
-<!-- 이미지 (추후 추가 예정) -->
-<!-- <img src="이미지URL" alt="경매 상품 등록" width="370" /><br> -->
-
-<em>다중 이미지 업로드와 카테고리별 상품 등록 및 검색 기능</em>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td align="center" style="width: 100%; padding: 20px;">
-
-<strong>입찰 시스템</strong><br>
-
-<!-- 이미지 (추후 추가 예정) -->
-<!-- <img src="이미지URL" alt="입찰" width="370" /><br> -->
-
-<em>HTTP 기반 입찰 제출 및 입찰 내역 조회</em>
-
-</td>
-
-<td align="center" style="width: 100%; padding: 20px;">
-
-<strong>실시간 채팅</strong><br>
-
-<!-- 이미지 (추후 추가 예정) -->
-<!-- <img src="이미지URL" alt="실시간 채팅" width="370" /><br> -->
-
-<em>구매자-판매자 간 1:1 실시간 채팅 및 읽음 처리 기능</em>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td align="center" style="width: 100%; padding: 20px;">
-
-<strong>안전결제 시스템</strong><br>
-
-<!-- 이미지 (추후 추가 예정) -->
-<!-- <img src="이미지URL" alt="안전결제" width="370" /><br> -->
-
-<em>토스페이먼츠 연동 에스크로 결제 및 주문 관리</em>
-
-</td>
-
-<td align="center" style="width: 100%; padding: 20px;">
-
-<strong>위시리스트</strong><br>
-
-<!-- 이미지 (추후 추가 예정) -->
-<!-- <img src="이미지URL" alt="위시리스트" width="370" /><br> -->
-
-<em>관심 상품 저장 및 관리 기능</em>
-
-</td>
-
-</tr>
-
-<tr>
-
-<td align="center" style="width: 100%; padding: 20px;">
-
-<strong>알림 시스템</strong><br>
-
-<!-- 이미지 (추후 추가 예정) -->
-<!-- <img src="이미지URL" alt="알림 시스템" width="370" /><br> -->
-
-<em>Firebase FCM 기반 실시간 푸시 알림 (입찰, 채팅, 경매 종료 등)</em>
-
-</td>
-
-<td align="center" style="width: 100%; padding: 20px;">
-
-<strong>관리자 페이지</strong><br>
-
-<!-- 이미지 (추후 추가 예정) -->
-<!-- <img src="이미지URL" alt="관리자 페이지" width="370" /><br> -->
-
-<em>IP 화이트리스트 기반 관리자 인증 및 회원/상품/문의 관리</em>
-
-</td>
-
-</tr>
-
+<table align="center" style="width: 100%; max-width: 900px; border-collapse: separate; border-spacing: 0 16px;">
+  <tr>
+    <td style="border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px 24px;">
+      <strong>🔐 회원가입 & 로그인</strong><br>
+      <em>이메일 인증으로 안전하게, 소셜 로그인으로 간편하게</em>
+    </td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px 24px;">
+      <strong>📦 경매 상품 조회 · 등록</strong><br>
+      <em>다양한 필터·정렬·카테고리로 직관적인 경매 상품 탐색 & 등록 기능</em>
+    </td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px 24px;">
+      <strong>💸 입찰 프로세스</strong><br>
+      <em>입찰 안내부터 낙찰 알림까지 친절하게 이어지는 흐름</em>
+    </td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px 24px;">
+      <strong>💬 실시간 채팅</strong><br>
+      <em>구매자-판매자 간 1:1 대화와 결제 요청·주소·이미지까지 주고받는 실시간 채팅 기능</em>
+    </td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px 24px;">
+      <strong>🛡️ 안전결제 시스템</strong><br>
+      <em>토스페이먼츠 연동으로 안심하고 결제하고, 주문 관리도 편하게</em>
+    </td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px 24px;">
+      <strong>💜 찜 기능</strong><br>
+      <em>마음에 드는 경매는 찜해두고 쉽게 찾아보기</em>
+    </td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px 24px;">
+      <strong>🔔 알림 서비스</strong><br>
+      <em>입찰·종료·공지까지 필요한 알림을 실시간으로</em>
+    </td>
+  </tr>
+  <tr>
+    <td style="border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px 24px;">
+      <strong>🛠️ 관리자 기능</strong><br>
+      <em>문의·신고 처리부터 회원·페널티 관리, 알림 발송까지 운영에 필요한 전반적인 관리 기능 제공</em>
+    </td>
+  </tr>
 </table>
 
 <br>
@@ -401,7 +279,7 @@ PW : admin123
 
 - REST API 기반 입찰 제출
 - 입찰 가능 금액 안내 및 입찰가 검증
-- 입찰 후 낙관적 업데이트 및 서버 데이터 동기화로 실시간 갱신
+- 입찰 후 낙관적 업데이트 및 서버 데이터 동기화
 - 낙찰 알림 및 경매 종료 알림
 
 <details>
@@ -529,5 +407,19 @@ PW : admin123
 - 부하 테스트 진행
 - 성능 최적화 (쿼리, 렌더링 등)
 - Redis 확장 및 운영 관리
+
+<br>
+
+## 📄 관련 문서
+
+<details>
+  <summary><b>테이블/기능 요구사항 명세서</b></summary>
+  https://docs.google.com/spreadsheets/d/1tiiuyDQZtwt7OPu5pqWtwo_Ot8-M8TjxheeOr6L5Mzs/edit?usp=sharing
+</details>
+
+<details>
+  <summary><b>ERD</b></summary>
+  https://www.erdcloud.com/d/YXqSYq86nJmWGgMvj
+</details>
 
 <br>
