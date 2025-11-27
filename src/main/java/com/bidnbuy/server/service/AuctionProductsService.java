@@ -302,9 +302,6 @@ public class AuctionProductsService {
 
         products.setDeletedAt(LocalDateTime.now());
 
-        // 삭제 시, SellingStatus도 DELETED로 변경 명시적으로 관리
-        products.setSellingStatus(SellingStatus.DELETED);
-
         auctionProductsRepository.save(products);
     }
 
@@ -346,9 +343,6 @@ public class AuctionProductsService {
     private String calculateSellingStatusFromDbValue(String sellingStatusDb, java.time.LocalDateTime endTime, java.time.LocalDateTime startTime) {
         if (sellingStatusDb == null) return "진행중";
 
-        if ("DELETED".equals(sellingStatusDb)) {
-            return "삭제";
-        }
         switch (sellingStatusDb) {
             case "PROGRESS":
                 java.time.LocalDateTime now = java.time.LocalDateTime.now();
