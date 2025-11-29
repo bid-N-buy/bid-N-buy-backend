@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: bidnbuy-mysql
+    environment:
+      # .env 파일에 정의된 변수들을 MySQL 환경 변수에 사용
+      MYSQL_ROOT_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      MYSQL_USER: ${SPRING_DATASOURCE_USERNAME}
+      MYSQL_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      MYSQL_DATABASE: bidnbuy
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - bidnbuy-net
+
+  backend:
+    build: .
+    container_name: backend-container
+    env_file:
+      - .env
+
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+    networks:
+      - bidnbuy-net
+
+volumes:
+  db_data:
+
+networks:
+  bidnbuy-net:

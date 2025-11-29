@@ -1,0 +1,174 @@
+package com.bidnbuy.server.controller;
+
+import com.bidnbuy.server.dto.ChatMessageDto;
+import com.bidnbuy.server.dto.ChatMessageRequestDto;
+import com.bidnbuy.server.dto.ResponseDto;
+import com.bidnbuy.server.entity.UserEntity;
+import com.bidnbuy.server.service.ChatMessageService;
+import com.bidnbuy.server.service.ImageService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.security.Principal;
+
+@Tag(name="채팅 메시지 API", description = "채팅 메시지 관련 기능 제공")
+@Slf4j
+@Controller
+@RequiredArgsConstructor
+public class ChatController {
+    private final SimpMessageSendingOperations messageSendingTemplate;
+    private final ChatMessageService chatMessageService;
+    private final ImageService imageService;
+
+    @MessageMapping("/chat/message")
+    public void sendMessage(@Payload ChatMessageRequestDto requestDto, SimpMessageHeaderAccessor accessor){
+        Principal principal = accessor.getUser();
+
+        if(principal == null){
+            log.error("Principal is null. STOMP 세션에 인증 정보가 없어 메시지 전송을 거부합니다. (Principal: {})", principal);
+            return;
+        }
+
+        Long senderId;
+        try{
+            senderId = Long.parseLong(principal.getName());
+        }catch (Exception e){
+            log.error("인증된 사용자 ID 추출 실패 (Long 캐스팅 오류 또는 Principal 구조 불일치): {}", e.getMessage());
+            return;
+        }
+        log.info("메세지 수신 : Room={}, Sender={}, Content={}", requestDto.getChatroomId(), senderId, requestDto.getMessage());
+
+        ChatMessageDto saveMessage = chatMessageService.saveAndProcessMessage(requestDto, senderId);
+
+        String destination = "/topic/chat/room/"+requestDto.getChatroomId();
+        messageSendingTemplate.convertAndSend(destination, saveMessage);
+
+        log.info("메세지 브로드캐스트 : destination={}", destination);
+    }
+
+    @Operation(
+        summary = "채팅 메세지 읽음 처리",
+        description = "특정 채팅방 접속 시 모든 메세지를 확인한 것으로 표시",
+        tags={"채팅 메시지 API"}
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "읽음 처리 요청 성공",
+            content=@Content(schema = @Schema(implementation = Void.class))
+        ),
+        @ApiResponse(
+            responseCode = "401",
+            description = "인증 정보 없음(Principal null)",
+            content = @Content(schema = @Schema(example = "인증되지않은 사용자"))
+        ),
+        @ApiResponse(
+            responseCode = "403",
+            description = " 올바르지 않은 사용자 id 형식(NumberFormatException)",
+            content=@Content(schema = @Schema(example = "올바르지 않은 사용자 id"))
+        )
+    })
+    @PutMapping("/chat/{chatroomId}/read")
+    public ResponseEntity<?> markMessageAsRead(@PathVariable Long chatroomId, Principal principal){
+        if(principal == null){
+            log.error("인증정보 없음");
+            return ResponseEntity.status(401).body("인증되지않은 사용자");
+        }
+        Long currentUserId;
+        try{
+            currentUserId = Long.parseLong(principal.getName());
+        } catch (NumberFormatException e) {
+            log.error("사용자 id추출 실패:{}", e.getMessage());
+            return ResponseEntity.status(403).body("올바르지 않은 사용자 id");
+        }
+        chatMessageService.processMarkingMessageAsRead(chatroomId, currentUserId);
+        log.info("채팅방 읽음처리 요청완료, 사용자 id:{}",currentUserId);
+        return ResponseEntity.ok().build();
+    }
+
+
+    @Operation(
+        summary = "채팅방 이미지, 메세지 전송",
+        description = "이미지 파일, 선택적 텍스트 메시지 전송, 이미지는 업로드 후 STOMP통해 채팅방에 발행, S3로 저장",
+        tags={"채팅 메시지 API"}
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "이미지 업로드 및 메시지 전송 성공",
+            content = @Content(schema = @Schema(type = "string", example ="https://s3.example.com/bidnbuy_123.jpg"))
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "잘못된 요청",
+            content = @Content(schema = @Schema(type = "string", example ="파일을 찾을 수 없습니다."))
+        ),
+        @ApiResponse(
+            responseCode = "401",
+            description = "인증 정보 없음",
+            content = @Content(schema = @Schema(type = "string", example="인증되지 않은 사용자"))
+        ),
+        @ApiResponse(
+            responseCode = "403",
+            description = "올바르지 않은 사용자 id",
+            content = @Content(schema = @Schema(type = "string", example="올바르지 않은 사용자 id"))
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "채팅방 혹은 사용자를 찾을 수 없음",
+            content = @Content(schema = @Schema(type = "string", example="채팅방을 찾을 수 없습니다."))
+        ),
+        @ApiResponse(
+            responseCode = "500",
+            description = "이미지 업로드 중 서버 오류 발생",
+            content = @Content(schema = @Schema(type = "string", example = "이미지 업로드 중 서버 오류 발생"))
+        )
+    })
+    @PostMapping("/chat/{chatroomId}/image")
+    public ResponseEntity<String> uploadChatImage(@PathVariable Long chatroomId,
+                                                  Principal principal,
+                                                  @RequestParam("file")MultipartFile imageFile,
+                                                  @RequestParam(value="messageText", required = false)String messageText){
+        if(principal == null){
+            return ResponseEntity.status(401).body("인증되지 않은 사용자");
+        }
+        Long userId;
+        try {
+            userId = Long.parseLong(principal.getName());
+        }catch (NumberFormatException e) {
+            return ResponseEntity.status(403).body("올바르지 않은 사용자 id");
+        }
+
+        try{
+            String imageUrl = imageService.uploadChatMessageImage(chatroomId, userId, imageFile, messageText);
+            return ResponseEntity.ok(imageUrl);
+        }catch (IllegalArgumentException e){
+            return ResponseEntity.badRequest().body(e.getMessage()); //빈 파일
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(404).body(e.getMessage()); //채팅방 , 사용자 문제
+        } catch (RuntimeException e){
+            return ResponseEntity.status(500).body("이미지 업로드 중 서버 오류 발생");
+        }
+    }
+}

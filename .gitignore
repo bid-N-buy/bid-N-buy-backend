@@ -37,3 +37,10 @@ out/
 .vscode/
 
 .env
+application.properties
+
+uploaded_files/
+
+src/main/resources/application.yml
+
+src/main/resources/bid-n-buy-service-key.json

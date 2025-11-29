@@ -1,0 +1,50 @@
+package com.bidnbuy.server.repository;
+
+import com.bidnbuy.server.dto.ChatRoomListDto;
+import com.bidnbuy.server.entity.AuctionProductsEntity;
+import com.bidnbuy.server.entity.ChatRoomEntity;
+import com.bidnbuy.server.entity.UserEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+public interface ChatRoomRepository extends JpaRepository<ChatRoomEntity, Long> {
+
+    Optional<ChatRoomEntity> findByBuyerIdAndSellerIdAndAuctionId(
+            UserEntity buyerId,
+            UserEntity sellerId,
+            AuctionProductsEntity auctionId
+    );
+
+    Optional<ChatRoomEntity> findByBuyerIdAndSellerIdAndAuctionIdAndDeletedAtIsNull(
+            UserEntity buyerId,
+            UserEntity sellerId,
+            AuctionProductsEntity auctionId
+    );
+
+    @Query("SELECT cr FROM ChatRoomEntity cr " +
+            "LEFT JOIN FETCH cr.buyerId b " +
+            "LEFT JOIN FETCH cr.sellerId s " +
+            "LEFT JOIN FETCH cr.auctionId a " +
+            "WHERE (cr.buyerId = :user OR cr.sellerId = :user) AND cr.deletedAt IS NULL")
+    List<ChatRoomEntity> findActiveRoomsByUserId(@Param("user") UserEntity user);
+
+    List<ChatRoomEntity> findByBuyerIdOrSellerIdAndDeletedAtIsNullOrderByLastMessageTime(UserEntity buyer, UserEntity seller);
+
+    //구매자, 판매자, 경매상품으로 채팅방 찾기
+    Optional<ChatRoomEntity> findByBuyerId_UserIdAndSellerId_UserIdAndAuctionId_AuctionId(
+        Long buyerId,
+        Long sellerId,
+        Long auctionProductId
+    );
+
+//    @Modifying
+//    @Query("update ChatRoomEntity cr set cr.deletedAt = :deletedAt where cr.chatroomId= :chatroomId")
+//    int softDelete(@Param("chatroomId")Long chatroomId, @Param("deletedAt")LocalDateTime deletedAt);
+
+}
