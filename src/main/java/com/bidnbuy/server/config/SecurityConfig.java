@@ -130,9 +130,7 @@ public class SecurityConfig {
                     .requestMatchers("/admin/**").hasRole("ADMIN")
                     .requestMatchers("/auctions/admin/**").hasRole("ADMIN")
 
-                    .anyRequest().authenticated()
-                )
-                .csrf(csrf -> csrf.disable());
+                    .anyRequest().authenticated());
 
         http.addFilterBefore(
                 jwtAuthenticationFilter,
