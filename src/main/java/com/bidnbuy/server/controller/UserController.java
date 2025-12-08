@@ -2,7 +2,6 @@ package com.bidnbuy.server.controller;
 
 import com.bidnbuy.server.dto.*;
 import com.bidnbuy.server.entity.UserEntity;
-import com.bidnbuy.server.enums.TradeFilterStatus;
 import com.bidnbuy.server.exception.CustomAuthenticationException;
 import com.bidnbuy.server.security.JwtProvider;
 import com.bidnbuy.server.service.*;
@@ -15,15 +14,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.units.qual.A;
-import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,17 +26,15 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.view.RedirectView;
-
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 
 @Tag(name = "유저 API", description = "유저 기능 제공")
 @Slf4j
 @RestController
 @RequestMapping({"/auth", "/api/auth"})
-public class   UserController {
+public class        UserController {
 
     @Value("${front.redirect.uri}")
     private String frontUri;
